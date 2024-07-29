@@ -72,6 +72,17 @@ export const constantRoutes = [
       path: '/dataDetail',
       name: 'DataDetail',
       component: () => import('@/views/dataDetail/index'),
+      meta: { title: '辅助帐明细', icon: 'dashboard' }
+    }]
+  },
+  {
+    path: '/auxiliaryDetail',
+    component: Layout,
+    hidden: true,
+    children: [{
+      path: '/auxiliaryDetail',
+      name: 'AuxiliaryDetail',
+      component: () => import('@/views/dataDetail/auxiliaryDetail.vue'),
       meta: { title: '辅助帐明细表', icon: 'dashboard' }
     }]
   },
@@ -83,6 +94,7 @@ export const constantRoutes = [
     children: [{
       path: '/detail',
       name: 'ProjectDetail',
+      hidden: true,
       component: () => import('@/views/projectDetail/index'),
       meta: { title: '项目费用填报', icon: 'dashboard' }
     }]

@@ -12,7 +12,7 @@
         <div class="text item">
           <div class="home-container">
             <div class="content clearfix">
-              <!-- <el-table
+              <el-table
                 :data="tableData"
                 style="width: 100%"
                 border
@@ -57,17 +57,17 @@
                     </span>
                   </template>
                 </el-table-column>
-                <el-table-column label="进入填报" align="center">
+                <el-table-column label="操作" align="center">
                   <template slot-scope="scope">
                     <el-button
                       size="mini"
                       @click="goToFillProject(scope.$index, scope.row)"
                     >
-                      填报该项目
+                      查看辅助账明细表
                     </el-button>
                   </template>
                 </el-table-column>
-              </el-table> -->
+              </el-table>
             </div>
           </div>
         </div>
@@ -85,7 +85,7 @@ export default {
   name: "Dashboard",
   created() {},
   mounted() {
-    // this.getStatisticsSummary();
+    this.getStatisticsSummary();
   },
   data() {
     return {
@@ -133,14 +133,6 @@ export default {
         });
     },
 
-    // 打开新增栏页面
-    addProjectView() {
-      this.isShow = true;
-      this.textBtn = "提交";
-      this.title = "添加任务";
-      this.type = 1;
-      this.$refs["formValidate"].resetFields();
-    },
     formatter(row, column) {
       return row.address;
     },
@@ -148,7 +140,7 @@ export default {
     // 填报项目明细
     goToFillProject(index, row) {
       this.$router.push({
-        path: "/projectDetail",
+        path: "/auxiliaryDetail",
         query: {
           params: JSON.stringify(row),
         },

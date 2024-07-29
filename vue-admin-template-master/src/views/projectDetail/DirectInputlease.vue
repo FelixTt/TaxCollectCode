@@ -15,6 +15,8 @@
         style="width: 100%; margin-top: 20px"
       >
         <el-table-column type="index" width="50"> </el-table-column>
+        <el-table-column prop="year" label="年份"> </el-table-column>
+        <el-table-column prop="month" label="月份"> </el-table-column>
         <el-table-column prop="equipmentNumber" label="设备编号">
         </el-table-column>
         <el-table-column prop="equipmentName" label="研发设备名称">
@@ -57,6 +59,8 @@
         style="width: 100%; margin-top: 20px"
       >
         <el-table-column type="index" width="50"> </el-table-column>
+        <el-table-column prop="year" label="年份"> </el-table-column>
+        <el-table-column prop="month" label="月份"> </el-table-column>
         <el-table-column prop="equipmentNumber" label="设备编号">
         </el-table-column>
         <el-table-column prop="equipmentName" label="研发设备名称">
@@ -87,6 +91,9 @@ import {
   deleteDirectInputleaseDetail,
 } from "@/api/projectDetailApi/DirectInputlease";
 
+import { updateDirectInputlease } from '@/api/updateStatisticsSummary/statisticsSummary.js'
+import { formatDate } from "@/utils/validate";
+
 export default {
   name: "DirectInputlease",
   components: { UploadExcelComponent },
@@ -111,7 +118,7 @@ export default {
         userID: this.$store.getters.id,
         projectID: this.passData.projectId,
       };
-      queryDirectInputleaseList(params)
+      return queryDirectInputleaseList(params)
         .then((res) => {
           if (res.data != null) {
             this.tableData = res.data.rows;
@@ -120,6 +127,7 @@ export default {
             this.tableData = [];
             this.total = 0;
           }
+          return res.data.rows
         })
         .catch((err) => {});
     },
@@ -137,11 +145,26 @@ export default {
       return false;
     },
     handleSuccess({ results, header }) {
+      let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
+      let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
+      // 对导入的时间做一个校验，导入的时间必须在项目开始时间和结束时间之间！
+      try {
+        for(let i=0; i<results.length; i++) {
+        let inputYear = parseInt(results[i]["年份"].split("年")[0])
+        if(inputYear < startYear || inputYear > endYear) {
+          this.$message.error("导入失败，请检查导入时间是否包含在项目开始时间和结束时间之间！");
+          return
+        }
+      }
+      } catch (error) {
+        this.$message.error("导入失败，请检查导入数据格式是否正确！");
+        return
+      }
       this.$message.success("导入成功！");
       let newData = this.dealData(results);
       this.dialogTableData = newData;
     },
-    save() {
+    async save() {
       if (this.dialogTableData.length === 0) {
         this.$message.warning("请导入数据后再添加！");
         return;
@@ -151,22 +174,90 @@ export default {
         projectID: this.passData.projectId,
         tableDate: this.dialogTableData,
       };
-      addDirectInputleaseDetail(params)
-        .then((res) => {
-          if (res.code == 200) {
-            this.pageNo = 1;
-            this.getDirectInputlease();
-            this.$message.success(res.message);
+
+      let succRes = null
+      let newList = null
+      try {
+        succRes = await addDirectInputleaseDetail(params)
+        newList = await this.getDirectInputlease()
+        this.$message.success(succRes.message);
+        this.updateStaticsData(newList)
+      } catch (error) {
+        this.$message.error("添加直投--经营租赁表信息错误！", error);
+      }
+      this.dialogVisible = false;
+      this.dialogTableData = [];
+    },
+    async updateStaticsData(data) {
+      let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
+      let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
+      for(let i=0; i<endYear-startYear+1; i++) {
+        let year = (startYear + i) + "年"
+        let JanDirectInputleaseSum = this.statsDirectInputlease(year, data, "1月")
+        let FebDirectInputleaseSum = this.statsDirectInputlease(year, data, "2月")
+        let MarDirectInputleaseSum = this.statsDirectInputlease(year, data, "3月")
+        let AprDirectInputleaseSum = this.statsDirectInputlease(year, data, "4月")
+        let MayDirectInputleaseSum = this.statsDirectInputlease(year, data, "5月")
+        let JunDirectInputleaseSum = this.statsDirectInputlease(year, data, "6月")
+        let JulDirectInputleaseSum = this.statsDirectInputlease(year, data, "7月")
+        let AugDirectInputleaseSum = this.statsDirectInputlease(year, data, "8月")
+        let SepDirectInputleaseSum = this.statsDirectInputlease(year, data, "9月")
+        let OctDirectInputleaseSum = this.statsDirectInputlease(year, data, "10月")
+        let NovDirectInputleaseSum = this.statsDirectInputlease(year, data, "11月")
+        let DecDirectInputleaseSum = this.statsDirectInputlease(year, data, "12月")
+        let yearDirectInputleaseSum = JanDirectInputleaseSum + FebDirectInputleaseSum + MarDirectInputleaseSum + AprDirectInputleaseSum + MayDirectInputleaseSum + JunDirectInputleaseSum + JulDirectInputleaseSum + AugDirectInputleaseSum + SepDirectInputleaseSum + OctDirectInputleaseSum + NovDirectInputleaseSum + DecDirectInputleaseSum
+
+        let MonthInfo = {
+          JanDirectInputleaseSum,
+          FebDirectInputleaseSum,
+          MarDirectInputleaseSum,
+          AprDirectInputleaseSum,
+          MayDirectInputleaseSum,
+          JunDirectInputleaseSum,
+          JulDirectInputleaseSum,
+          AugDirectInputleaseSum,
+          SepDirectInputleaseSum,
+          OctDirectInputleaseSum,
+          NovDirectInputleaseSum,
+          DecDirectInputleaseSum,
+          yearDirectInputleaseSum,
+          year
+        }
+        // 将数据存储起来
+        let params = {
+          userID: this.$store.getters.id,
+          projectID: this.passData.projectId,
+          tableDate: this.dialogTableData,
+          MonthInfo
+        };
+        
+        let res = await updateDirectInputlease(params)
+        if(res.code === 200) {
+          this.$message.success(res.message);
+        } else {
+          this.$message.error(res.message);
+        }
+      }
+    },
+    statsDirectInputlease(year, rows, month){
+      let sum = 0;
+      if(rows == undefined || rows.length === 0) {
+        return 0
+      }
+      for(let i = 0; i < rows.length; i++) {
+        if(rows[i].year !== year) {
+          continue
+        }
+        if(rows[i].month === month) {
+          if(parseFloat(rows[i].workingHours) === 0) {
+            continue
           } else {
-            this.$message.error(res.msg);
+            let rate = parseFloat(rows[i].developmentHours) / parseFloat(rows[i].workingHours)
+            sum = sum + rate * parseFloat(rows[i].monthlyDepreciation)
           }
-          this.dialogVisible = false;
-          this.dialogTableData = [];
-        })
-        .catch((err) => {
-          this.dialogTableData = [];
-          this.dialogVisible = false;
-        });
+        }
+      }
+      return sum
     },
 
     // 数据处理，替换key值
@@ -176,6 +267,8 @@ export default {
         for (let i = 0; i < tableData.length; i++) {
           let _item = JSON.parse(
             JSON.stringify(tableData[i])
+              .replace("年份", "year")
+              .replace("月份", "month")
               .replace("设备编号", "equipmentNumber")
               .replace("研发设备名称", "equipmentName")
               .replace("费用类型", "expenseType")
@@ -211,21 +304,22 @@ export default {
     },
 
     // 删除数据
-    deleteRow(index, tableData) {
+    async deleteRow(index, tableData) {
       let params = {
         id: tableData[index].id,
         projectID: this.passData.projectId,
       };
-      deleteDirectInputleaseDetail(params)
-        .then((res) => {
-          if (res.code == 200) {
-            this.$message.success(res.message);
-          } else {
-            this.$message.error(res.msg);
-          }
-          this.getDirectInputlease();
-        })
-        .catch((err) => {});
+
+      let succRes = await deleteDirectInputleaseDetail(params)
+      this.$message.success(succRes.message);
+      let newList = await this.getDirectInputlease()
+
+      // 更新汇总数据
+      this.updateStaticsData(newList)
+    },
+    // 格式化展示时间
+    showTableTime(time) {
+      return formatDate(time);
     },
   },
 };

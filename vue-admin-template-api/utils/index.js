@@ -1,10 +1,3 @@
-/**
- * 描述: 连接mysql模块
- * 作者: Jack Chen
- * 日期: 2020-06-20
-*/
-
-
 const mysql = require('mysql');
 const config = require('../db/dbConfig');
 
@@ -25,7 +18,7 @@ function querySql(sql) {
   return new Promise((resolve, reject) => {
     try {
       conn.query(sql, (err, res) => {
-        // console.log("@@@sql ===================== ", sql)
+        console.log("@@@sql ========================= ", sql)
         if (err) {
           reject(err);
         } else {

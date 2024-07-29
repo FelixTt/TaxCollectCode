@@ -67,7 +67,7 @@ async function addAmortizationDetail(req, res, next) {
         let failCount = 0
         for (let i = 0; i < tableDate.length; i++) {
             count++
-            sql = `insert into amortization(projectId, date, projectNum, IntangibleAssetsNum, IntangibleAssetsName, IntangibleAssetsType, expenseType, MonthlyDepreciation, workTime, developTime) values(${projectID}, '${tableDate[i].date}', '${tableDate[i].projectNum}', '${tableDate[i].IntangibleAssetsNum}','${tableDate[i].IntangibleAssetsName}','${tableDate[i].IntangibleAssetsType}','${tableDate[i].expenseType}','${tableDate[i].MonthlyDepreciation}','${tableDate[i].workTime}', '${tableDate[i].developTime}')`;
+            sql = `insert into amortization(projectId, year, month, projectNum, IntangibleAssetsNum, IntangibleAssetsName, IntangibleAssetsType, expenseType, MonthlyDepreciation, workTime, developTime) values(${projectID}, '${tableDate[i].year}','${tableDate[i].month}', '${tableDate[i].projectNum}', '${tableDate[i].IntangibleAssetsNum}','${tableDate[i].IntangibleAssetsName}','${tableDate[i].IntangibleAssetsType}','${tableDate[i].expenseType}','${tableDate[i].MonthlyDepreciation}','${tableDate[i].workTime}', '${tableDate[i].developTime}')`;
             await querySql(sql)
                 .then(data => {
                     succCount++

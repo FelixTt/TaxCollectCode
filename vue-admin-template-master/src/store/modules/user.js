@@ -93,6 +93,9 @@ const actions = {
       resetRouter()
       commit('RESET_STATE')
       resolve()
+      this.$router.push({
+        path: "/login",
+      });
       // }).catch(error => {
       //   reject(error)
       // })

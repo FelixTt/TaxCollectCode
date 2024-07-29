@@ -66,7 +66,7 @@ async function addExpendDetailDetail(req, res, next) {
         let failCount = 0
         for (let i = 0; i < tableDate.length; i++) {
             count++
-            sql = `insert into ExpendDetail(projectId, specialIncome, materialCost) values(${projectID}, '${tableDate[i].specialIncome}', '${tableDate[i].materialCost}')`;
+            sql = `insert into ExpendDetail(projectId, year, month, specialIncome, materialCost) values(${projectID},'${tableDate[i].year}','${tableDate[i].month}', '${tableDate[i].specialIncome}', '${tableDate[i].materialCost}')`;
             await querySql(sql)
                 .then(data => {
                     succCount++

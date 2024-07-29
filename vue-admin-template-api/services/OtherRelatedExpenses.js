@@ -66,7 +66,7 @@ async function addOtherRelatedExpensesDetail(req, res, next) {
         let failCount = 0
         for (let i = 0; i < tableDate.length; i++) {
             count++
-            sql = `insert into OtherRelatedExpenses(projectId, profileCostEtc, achieveCostEtc, intellectualPropertyCostEtc, TravelExpenseEtc) values(${projectID}, '${tableDate[i].profileCostEtc}', '${tableDate[i].achieveCostEtc}', '${tableDate[i].intellectualPropertyCostEtc}','${tableDate[i].TravelExpenseEtc}')`;
+            sql = `insert into OtherRelatedExpenses(projectId, year, month, profileCostEtc, achieveCostEtc, intellectualPropertyCostEtc, TravelExpenseEtc) values(${projectID}, '${tableDate[i].year}', '${tableDate[i].month}', '${tableDate[i].profileCostEtc}', '${tableDate[i].achieveCostEtc}', '${tableDate[i].intellectualPropertyCostEtc}','${tableDate[i].TravelExpenseEtc}')`;
             await querySql(sql)
                 .then(data => {
                     succCount++

@@ -15,7 +15,8 @@
         style="width: 100%; margin-top: 20px"
       >
         <el-table-column type="index" width="50"> </el-table-column>
-        <el-table-column prop="date" label="日期"> </el-table-column>
+        <el-table-column prop="year" label="年份"> </el-table-column>
+        <el-table-column prop="month" label="月份"> </el-table-column>
         <el-table-column prop="projectNum" label="研发项目序号">
         </el-table-column>
         <el-table-column prop="equipmentNum" label="设备编号">
@@ -58,7 +59,8 @@
         style="width: 100%; margin-top: 20px"
       >
         <el-table-column type="index" width="50"> </el-table-column>
-        <el-table-column prop="date" label="日期"> </el-table-column>
+        <el-table-column prop="year" label="年份"> </el-table-column>
+        <el-table-column prop="month" label="月份"> </el-table-column>
         <el-table-column prop="projectNum" label="研发项目序号">
         </el-table-column>
         <el-table-column prop="equipmentNum" label="设备编号">
@@ -95,6 +97,10 @@ import {
   deleteDepreciationDetail,
 } from "@/api/projectDetailApi/Depreciation";
 
+import { updateDepreciation } from '@/api/updateStatisticsSummary/statisticsSummary.js'
+
+import { formatDate } from "@/utils/validate";
+
 export default {
   name: "Depreciation",
   components: { UploadExcelComponent },
@@ -119,7 +125,7 @@ export default {
         userID: this.$store.getters.id,
         projectID: this.passData.projectId,
       };
-      queryDepreciationList(params)
+      return queryDepreciationList(params)
         .then((res) => {
           if (res.data != null) {
             this.tableData = res.data.rows;
@@ -128,6 +134,7 @@ export default {
             this.tableData = [];
             this.total = 0;
           }
+          return res.data.rows
         })
         .catch((err) => {});
     },
@@ -145,11 +152,26 @@ export default {
       return false;
     },
     handleSuccess({ results, header }) {
+      let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
+      let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
+      // 对导入的时间做一个校验，导入的时间必须在项目开始时间和结束时间之间！
+      try {
+        for(let i=0; i<results.length; i++) {
+        let inputYear = parseInt(results[i]["年份"].split("年")[0])
+        if(inputYear < startYear || inputYear > endYear) {
+          this.$message.error("导入失败，请检查导入时间是否包含在项目开始时间和结束时间之间！");
+          return
+        }
+      }
+      } catch (error) {
+        this.$message.error("导入失败，请检查导入数据格式是否正确！");
+        return
+      }
       this.$message.success("导入成功！");
       let newData = this.dealData(results);
       this.dialogTableData = newData;
     },
-    save() {
+    async save() {
       if (this.dialogTableData.length === 0) {
         this.$message.warning("请导入数据后再添加！");
         return;
@@ -159,22 +181,35 @@ export default {
         projectID: this.passData.projectId,
         tableDate: this.dialogTableData,
       };
-      addDepreciationDetail(params)
-        .then((res) => {
-          if (res.code == 200) {
-            this.pageNo = 1;
-            this.getDepreciationList();
-            this.$message.success(res.message);
-          } else {
-            this.$message.error(res.msg);
-          }
-          this.dialogVisible = false;
-          this.dialogTableData = [];
-        })
-        .catch((err) => {
-          this.dialogTableData = [];
-          this.dialogVisible = false;
-        });
+      let succRes = null
+      let newList = null
+      try {
+        succRes = await addDepreciationDetail(params)
+        newList = await this.getDepreciationList()
+        this.$message.success(succRes.message);
+        this.updateStaticsData(newList)
+      } catch (error) {
+        this.$message.error("添加折旧表信息错误！", error);
+      }
+      this.dialogVisible = false;
+      this.dialogTableData = [];
+
+      // addDepreciationDetail(params)
+      //   .then((res) => {
+      //     if (res.code == 200) {
+      //       this.pageNo = 1;
+      //       this.getDepreciationList();
+      //       this.$message.success(res.message);
+      //     } else {
+      //       this.$message.error(res.msg);
+      //     }
+      //     this.dialogVisible = false;
+      //     this.dialogTableData = [];
+      //   })
+      //   .catch((err) => {
+      //     this.dialogTableData = [];
+      //     this.dialogVisible = false;
+      //   });
     },
 
     // 数据处理，替换key值
@@ -192,7 +227,8 @@ export default {
           // 研发工时         developTime
           let _item = JSON.parse(
             JSON.stringify(tableData[i])
-              .replace("月份", "date")
+              .replace("年份", "year")
+              .replace("月份", "month")
               .replace("研发项目序号", "projectNum")
               .replace("设备编号", "equipmentNum")
               .replace("研发设备名称", "equipmentName")
@@ -229,21 +265,94 @@ export default {
     },
 
     // 删除数据
-    deleteRow(index, tableData) {
+    async deleteRow(index, tableData) {
       let params = {
         id: tableData[index].id,
         projectID: this.passData.projectId,
       };
-      deleteDepreciationDetail(params)
-        .then((res) => {
-          if (res.code == 200) {
-            this.$message.success(res.message);
+      let succRes = await deleteDepreciationDetail(params)
+      this.$message.success(succRes.message);
+      let newList = await this.getDepreciationList()
+
+      // 更新汇总数据
+      this.updateStaticsData(newList)
+    },
+    async updateStaticsData(data) {
+      let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
+      let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
+      for(let i=0; i<endYear-startYear+1; i++) {
+        let year = (startYear + i) + "年"
+        let JanDepreciationSum = this.statsDepreciation(year, data, "1月")
+        let FebDepreciationSum = this.statsDepreciation(year, data, "2月")
+        let MarDepreciationSum = this.statsDepreciation(year, data, "3月")
+        let AprDepreciationSum = this.statsDepreciation(year, data, "4月")
+        let MayDepreciationSum = this.statsDepreciation(year, data, "5月")
+        let JunDepreciationSum = this.statsDepreciation(year, data, "6月")
+        let JulDepreciationSum = this.statsDepreciation(year, data, "7月")
+        let AugDepreciationSum = this.statsDepreciation(year, data, "8月")
+        let SepDepreciationSum = this.statsDepreciation(year, data, "9月")
+        let OctDepreciationSum = this.statsDepreciation(year, data, "10月")
+        let NovDepreciationSum = this.statsDepreciation(year, data, "11月")
+        let DecDepreciationSum = this.statsDepreciation(year, data, "12月")
+        let yearDepreciationSum = JanDepreciationSum + FebDepreciationSum + MarDepreciationSum + AprDepreciationSum + MayDepreciationSum + JunDepreciationSum + JulDepreciationSum + AugDepreciationSum + SepDepreciationSum + OctDepreciationSum + NovDepreciationSum + DecDepreciationSum
+        
+        let MonthInfo = {
+          JanDepreciationSum,
+          FebDepreciationSum,
+          MarDepreciationSum,
+          AprDepreciationSum,
+          MayDepreciationSum,
+          JunDepreciationSum,
+          JulDepreciationSum,
+          AugDepreciationSum,
+          SepDepreciationSum,
+          OctDepreciationSum,
+          NovDepreciationSum,
+          DecDepreciationSum,
+          yearDepreciationSum,
+          year
+        }
+        // 将数据存储起来
+        let params = {
+          userID: this.$store.getters.id,
+          projectID: this.passData.projectId,
+          tableDate: this.dialogTableData,
+          MonthInfo
+        };
+        
+        let res = await updateDepreciation(params)
+        if(res.code === 200) {
+          this.$message.success(res.message);
+        } else {
+          this.$message.error(res.message);
+        }
+      }
+    },
+    statsDepreciation(year, rows, month){
+      let sum = 0;
+      if(rows == undefined || rows.length === 0) {
+        return 0
+      }
+      for(let i = 0; i < rows.length; i++) {
+        if(rows[i].year !== year) {
+          continue
+        }
+        if(rows[i].month === month) {
+          if(parseFloat(rows[i].workTime) === 0) {
+            continue
           } else {
-            this.$message.error(res.msg);
+            let rate = parseFloat(rows[i].developTime) / parseFloat(rows[i].workTime)
+            sum = sum + rate * parseFloat(rows[i].MonthlyDepreciation)
           }
-          this.getDepreciationList();
-        })
-        .catch((err) => {});
+        }
+      }
+      return sum
+    },
+
+    // 格式化展示时间
+    showTableTime(time) {
+      return formatDate(time);
+      // return this.$Valid.formatDate(time);
     },
   },
 };

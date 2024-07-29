@@ -66,7 +66,7 @@ async function addDirectInputFuelDetail(req, res, next) {
         let failCount = 0
         for (let i = 0; i < tableDate.length; i++) {
             count++
-            sql = `insert into directInputFuel(projectId, equipmentName, energyConsumption, electricityRate, workingHours, developmentHours, waterRate, otherFuelPower) values(${projectID}, '${tableDate[i].equipmentName}', '${tableDate[i].energyConsumption}', '${tableDate[i].electricityRate}','${tableDate[i].workingHours}', '${tableDate[i].developmentHours}','${tableDate[i].waterRate}', '${tableDate[i].otherFuelPower}')`;
+            sql = `insert into directInputFuel(projectId, year, month, equipmentName, energyConsumption, electricityRate, workingHours, developmentHours, waterRate, otherFuelPower) values(${projectID}, '${tableDate[i].year}', '${tableDate[i].month}', '${tableDate[i].equipmentName}', '${tableDate[i].energyConsumption}', '${tableDate[i].electricityRate}','${tableDate[i].workingHours}', '${tableDate[i].developmentHours}','${tableDate[i].waterRate}', '${tableDate[i].otherFuelPower}')`;
             await querySql(sql)
                 .then(data => {
                     succCount++

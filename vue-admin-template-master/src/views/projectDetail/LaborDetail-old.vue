@@ -1,12 +1,44 @@
 <template>
   <div class="content">
     <div class="btn-region" style="display: flex； justify-content:flex-end">
+      <!-- <el-button type="primary" size="medium" @click="dialogVisible = true">
+        新增
+      </el-button> -->
       <el-button type="primary" size="medium" @click="dialogVisible = true">
         批量导入
       </el-button>
+      <!-- <el-button type="primary" size="medium" @click="cancel()">
+        取消并退出此申报表
+      </el-button> -->
     </div>
 
     <div class="app-container">
+      <!-- <el-table
+        :data="tableData"
+        border
+        stripe
+        highlight-current-row
+        style="width: 100%; margin-top: 20px"
+      >
+        <el-table-column
+          v-for="item of tableHeader"
+          :key="item"
+          :prop="item"
+          :label="item"
+        >
+        </el-table-column>
+        <el-table-column fixed="right" label="操作" width="120">
+          <template slot-scope="scope">
+            <el-button
+              @click.native.prevent="deleteRow(scope.$index, tableData)"
+              type="text"
+              size="small"
+            >
+              移除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table> -->
       <el-table
         :data="tableData"
         border
@@ -16,7 +48,7 @@
       >
         <el-table-column type="index" width="50"> </el-table-column>
         <el-table-column prop="year" label="年份"> </el-table-column>
-        <el-table-column prop="month" label="月份"> </el-table-column>
+        <el-table-column prop="date" label="月份"> </el-table-column>
         <el-table-column prop="category" label="种类"> </el-table-column>
         <el-table-column prop="proof" label="凭证编号"> </el-table-column>
         <el-table-column prop="abstract" label="摘要"> </el-table-column>
@@ -112,6 +144,17 @@
         </el-table-column>
         <el-table-column prop="developTime" label="研发工时" width="180">
         </el-table-column>
+        <!-- <el-table-column fixed="right" label="操作" width="120">
+          <template slot-scope="scope">
+            <el-button
+              @click.native.prevent="deleteRow(scope.$index, tableData)"
+              type="text"
+              size="small"
+            >
+              移除
+            </el-button>
+          </template>
+        </el-table-column> -->
       </el-table>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogCancel()">取 消</el-button>
@@ -131,7 +174,7 @@ import {
   deleteProjectLaborDetail,
 } from "@/api/projectDetailApi/LaborDetail";
 
-import { updateStatisticsSummary } from "@/api/updateStatisticsSummary/statisticsSummary"
+import { updateStatisticsSummary, updateInsurancesAndFundSum, updateOtherRelatedExpenses, updatePropOfReachHours } from "@/api/updateStatisticsSummary/statisticsSummary"
 import { formatDate } from "@/utils/validate";
 
 export default {
@@ -141,6 +184,7 @@ export default {
   data() {
     return {
       tableData: [],
+      // tableHeader: [],
       dialogTableData: [],
       dialogVisible: false,
     };
@@ -339,52 +383,14 @@ export default {
       this.updateStaticsData(newList)
     },
 
-    // 汇总统计更新
-    async updateStaticsData(data) {
+
+    // 统计工资薪金
+    // statsSalaryByMon(rows, "1月", "salary", "performance")
+    async getSalarySum(data) {
       let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
       let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
       for(let i=0; i<endYear-startYear+1; i++) {
         let year = (startYear + i) + "年"
-        // 统计工资薪金
-        let SalarySumMonthInfo = this.getSalarySum(year, data)
-        // 五险一金
-        let InsurancesAndFundMonthInfo = this.getInsurancesAndFund(year, data)
-        // 其他相关费用
-        let OtherRelatedExpensesMonthInfo = this.getOtherRelatedExpenses(year, data)
-        // 统计研发工时占比
-        let PropOfReachHoursMonthInfo = this.getPropOfReachHours(year, data)
-        let MonthInfo = {
-          year,
-          SalarySumMonthInfo,
-          InsurancesAndFundMonthInfo,
-          OtherRelatedExpensesMonthInfo,
-          PropOfReachHoursMonthInfo
-        }
-        // console.log("monthInfo", MonthInfo)
-
-        let params = {
-          userID: this.$store.getters.id,
-          projectID: this.passData.projectId,
-          tableDate: this.dialogTableData,
-          MonthInfo
-        };
-        // console.log("@@@@@", params)
-        let res = await updateStatisticsSummary(params)
-        if(res.code === 200) {
-          this.$message.success(res.message);
-        } else {
-          this.$message.error(res.message);
-        }
-      }
-    },
-
-    // 统计工资薪金
-    // statsSalaryByMon(rows, "1月", "salary", "performance")
-    getSalarySum(year, data) {
-      // let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
-      // let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
-      // for(let i=0; i<endYear-startYear+1; i++) {
-      //   let year = (startYear + i) + "年"
         let Jan = this.statsSalaryAndPerforByMonth(year, data, "1月", "salary", "performance")
         let Feb = this.statsSalaryAndPerforByMonth(year, data, "2月", "salary", "performance")
         let Mar = this.statsSalaryAndPerforByMonth(year, data, "3月", "salary", "performance")
@@ -398,7 +404,7 @@ export default {
         let Nov = this.statsSalaryAndPerforByMonth(year, data, "11月", "salary", "performance")
         let Dec = this.statsSalaryAndPerforByMonth(year, data, "12月", "salary", "performance")
         let yearSum = Jan + Feb + Mar + Apr + May + Jun + Jul + Aug + Sep + Oct + Nov + Dec
-        let SalarySumMonthInfo = {
+        let MonthInfo = {
           Jan,
           Feb,
           Mar,
@@ -414,30 +420,29 @@ export default {
           yearSum,
           year,
         }
-        return SalarySumMonthInfo
-        // // 将数据存储起来
-        // let params = {
-        //   userID: this.$store.getters.id,
-        //   projectID: this.passData.projectId,
-        //   tableDate: this.dialogTableData,
-        //   MonthInfo
-        // };
+        // 将数据存储起来
+        let params = {
+          userID: this.$store.getters.id,
+          projectID: this.passData.projectId,
+          tableDate: this.dialogTableData,
+          MonthInfo
+        };
         
-        // let res = await updateStatisticsSummary(params)
-        // if(res.code === 200) {
-        //   this.$message.success(res.message);
-        // } else {
-        //   this.$message.error(res.message);
-        // }
-      // }
+        let res = await updateStatisticsSummary(params)
+        if(res.code === 200) {
+          this.$message.success(res.message);
+        } else {
+          this.$message.error(res.message);
+        }
+      }
     },
 
     // 统计五险一金
-    getInsurancesAndFund(year, data) {
-      // let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
-      // let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
-      // for(let i=0; i<endYear-startYear+1; i++) {
-      //   let year = (startYear + i) + "年"
+    async getInsurancesAndFund(data) {
+      let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
+      let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
+      for(let i=0; i<endYear-startYear+1; i++) {
+        let year = (startYear + i) + "年"
         let JanInsAndFund = this.statsInsurancesAndFundByMonth(year, data, "1月")
         let FebInsAndFund = this.statsInsurancesAndFundByMonth(year, data, "2月")
         let MarInsAndFund = this.statsInsurancesAndFundByMonth(year, data, "3月")
@@ -451,7 +456,7 @@ export default {
         let NovInsAndFund = this.statsInsurancesAndFundByMonth(year, data, "11月")
         let DecInsAndFund = this.statsInsurancesAndFundByMonth(year, data, "12月")
         let yearInsAndFundSum = JanInsAndFund + FebInsAndFund + MarInsAndFund + AprInsAndFund + MayInsAndFund + JunInsAndFund + JulInsAndFund + AugInsAndFund + SepInsAndFund + OctInsAndFund + NovInsAndFund + DecInsAndFund
-        let InsurancesAndFundMonthInfo = {
+        let MonthInfo = {
           JanInsAndFund,
           FebInsAndFund,
           MarInsAndFund,
@@ -467,28 +472,27 @@ export default {
           yearInsAndFundSum,
           year
         }
-        return InsurancesAndFundMonthInfo
         // 将数据存储起来
-        // let params = {
-        //   userID: this.$store.getters.id,
-        //   projectID: this.passData.projectId,
-        //   tableDate: this.dialogTableData,
-        //   MonthInfo
-        // };
-        // let res = await updateInsurancesAndFundSum(params)
-        // if(res.code === 200) {
-        //   this.$message.success(res.message);
-        // } else {
-        //   this.$message.error(res.message);
-        // }
-      // }
+        let params = {
+          userID: this.$store.getters.id,
+          projectID: this.passData.projectId,
+          tableDate: this.dialogTableData,
+          MonthInfo
+        };
+        let res = await updateInsurancesAndFundSum(params)
+        if(res.code === 200) {
+          this.$message.success(res.message);
+        } else {
+          this.$message.error(res.message);
+        }
+      }
     },
     // 其他相关费用
-    getOtherRelatedExpenses(year, data){
-    //   let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
-    //   let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
-    //   for(let i=0; i<endYear-startYear+1; i++) {
-    //     let year = (startYear + i) + "年"
+    async getOtherRelatedExpenses(data){
+      let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
+      let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
+      for(let i=0; i<endYear-startYear+1; i++) {
+        let year = (startYear + i) + "年"
         let JanOtherRelatedExpenses = this.statsOtherRelatedExpenses(year, data, "1月")
         let FebOtherRelatedExpenses = this.statsOtherRelatedExpenses(year, data, "2月")
         let MarOtherRelatedExpenses = this.statsOtherRelatedExpenses(year, data, "3月")
@@ -502,7 +506,7 @@ export default {
         let NovOtherRelatedExpenses = this.statsOtherRelatedExpenses(year, data, "11月")
         let DecOtherRelatedExpenses = this.statsOtherRelatedExpenses(year, data, "12月")
         let yearOtherRelatedExpenses = JanOtherRelatedExpenses + FebOtherRelatedExpenses + MarOtherRelatedExpenses + AprOtherRelatedExpenses + MayOtherRelatedExpenses + JunOtherRelatedExpenses + JulOtherRelatedExpenses + AugOtherRelatedExpenses + SepOtherRelatedExpenses + OctOtherRelatedExpenses + NovOtherRelatedExpenses + DecOtherRelatedExpenses
-        let OtherRelatedExpensesMonthInfo = {
+        let MonthInfo = {
           JanOtherRelatedExpenses,
           FebOtherRelatedExpenses,
           MarOtherRelatedExpenses,
@@ -518,107 +522,111 @@ export default {
           yearOtherRelatedExpenses,
           year,
         }
-        return OtherRelatedExpensesMonthInfo
         // 将数据存储起来
-        // let params = {
-        //   userID: this.$store.getters.id,
-        //   projectID: this.passData.projectId,
-        //   tableDate: this.dialogTableData,
-        //   MonthInfo
-        // };
-        // let res = await updateOtherRelatedExpenses(params)
-        // if(res.code === 200) {
-        //   this.$message.success(res.message);
-        // } else {
-        //   this.$message.error(res.message);
-        // }
-      // }
+        let params = {
+          userID: this.$store.getters.id,
+          projectID: this.passData.projectId,
+          tableDate: this.dialogTableData,
+          MonthInfo
+        };
+        let res = await updateOtherRelatedExpenses(params)
+        if(res.code === 200) {
+          this.$message.success(res.message);
+        } else {
+          this.$message.error(res.message);
+        }
+      }
     },
     // 统计研发工时占比
-    getPropOfReachHours(year, data){
-      // let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
-      // let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
-      //  for(let i=0; i<endYear-startYear+1; i++) {
-      //     let year = (startYear + i) + "年"
-          let JanWorkTimeSum = this.statsPropOfReachHours(year, data, "1月", "workTime")
-          let FebWorkTimeSum = this.statsPropOfReachHours(year, data, "2月", "workTime")
-          let MarWorkTimeSum = this.statsPropOfReachHours(year, data, "3月", "workTime")
-          let AprWorkTimeSum = this.statsPropOfReachHours(year, data, "4月", "workTime")
-          let MayWorkTimeSum = this.statsPropOfReachHours(year, data, "5月", "workTime")
-          let JunWorkTimeSum = this.statsPropOfReachHours(year, data, "6月", "workTime")
-          let JulWorkTimeSum = this.statsPropOfReachHours(year, data, "7月", "workTime")
-          let AugWorkTimeSum = this.statsPropOfReachHours(year, data, "8月", "workTime")
-          let SepWorkTimeSum = this.statsPropOfReachHours(year, data, "9月", "workTime")
-          let OctWorkTimeSum = this.statsPropOfReachHours(year, data, "10月", "workTime")
-          let NovWorkTimeSum = this.statsPropOfReachHours(year, data, "11月", "workTime")
-          let DecWorkTimeSum = this.statsPropOfReachHours(year, data, "12月", "workTime")
-          let yearWorkTimeSum = JanWorkTimeSum + FebWorkTimeSum + MarWorkTimeSum + AprWorkTimeSum + MayWorkTimeSum + JunWorkTimeSum + JulWorkTimeSum + AugWorkTimeSum + SepWorkTimeSum + OctWorkTimeSum + NovWorkTimeSum + DecWorkTimeSum
+    async getPropOfReachHours(data){
+      let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
+      let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
+       for(let i=0; i<endYear-startYear+1; i++) {
+        let year = (startYear + i) + "年"
+        let JanWorkTimeSum = this.statsPropOfReachHours(year, data, "1月", "workTime")
+        let FebWorkTimeSum = this.statsPropOfReachHours(year, data, "2月", "workTime")
+        let MarWorkTimeSum = this.statsPropOfReachHours(year, data, "3月", "workTime")
+        let AprWorkTimeSum = this.statsPropOfReachHours(year, data, "4月", "workTime")
+        let MayWorkTimeSum = this.statsPropOfReachHours(year, data, "5月", "workTime")
+        let JunWorkTimeSum = this.statsPropOfReachHours(year, data, "6月", "workTime")
+        let JulWorkTimeSum = this.statsPropOfReachHours(year, data, "7月", "workTime")
+        let AugWorkTimeSum = this.statsPropOfReachHours(year, data, "8月", "workTime")
+        let SepWorkTimeSum = this.statsPropOfReachHours(year, data, "9月", "workTime")
+        let OctWorkTimeSum = this.statsPropOfReachHours(year, data, "10月", "workTime")
+        let NovWorkTimeSum = this.statsPropOfReachHours(year, data, "11月", "workTime")
+        let DecWorkTimeSum = this.statsPropOfReachHours(year, data, "12月", "workTime")
+        let yearWorkTimeSum = JanWorkTimeSum + FebWorkTimeSum + MarWorkTimeSum + AprWorkTimeSum + MayWorkTimeSum + JunWorkTimeSum + JulWorkTimeSum + AugWorkTimeSum + SepWorkTimeSum + OctWorkTimeSum + NovWorkTimeSum + DecWorkTimeSum
 
-          let JanDevTimeSum = this.statsPropOfReachHours(year, data, "1月", "developTime")
-          let FebDevTimeSum = this.statsPropOfReachHours(year, data, "2月", "developTime")
-          let MarDevTimeSum = this.statsPropOfReachHours(year, data, "3月", "developTime")
-          let AprDevTimeSum = this.statsPropOfReachHours(year, data, "4月", "developTime")
-          let MayDevTimeSum = this.statsPropOfReachHours(year, data, "5月", "developTime")
-          let JunDevTimeSum = this.statsPropOfReachHours(year, data, "6月", "developTime")
-          let JulDevTimeSum = this.statsPropOfReachHours(year, data, "7月", "developTime")
-          let AugDevTimeSum = this.statsPropOfReachHours(year, data, "8月", "developTime")
-          let SepDevTimeSum = this.statsPropOfReachHours(year, data, "9月", "developTime")
-          let OctDevTimeSum = this.statsPropOfReachHours(year, data, "10月", "developTime")
-          let NovDevTimeSum = this.statsPropOfReachHours(year, data, "11月", "developTime")
-          let DecDevTimeSum = this.statsPropOfReachHours(year, data, "12月", "developTime")
-          let yearDevTimeSum = JanDevTimeSum + FebDevTimeSum + MarDevTimeSum + AprDevTimeSum + MayDevTimeSum + JunDevTimeSum + JulDevTimeSum + AugDevTimeSum + SepDevTimeSum + OctDevTimeSum + NovDevTimeSum + DecDevTimeSum
-          let yearPropOfReachHours = 0
-          if(yearDevTimeSum !== 0) {
-            yearPropOfReachHours = yearDevTimeSum / yearWorkTimeSum
-          } else {
-            yearPropOfReachHours = 0
-          }
+        let JanDevTimeSum = this.statsPropOfReachHours(year, data, "1月", "developTime")
+        let FebDevTimeSum = this.statsPropOfReachHours(year, data, "2月", "developTime")
+        let MarDevTimeSum = this.statsPropOfReachHours(year, data, "3月", "developTime")
+        let AprDevTimeSum = this.statsPropOfReachHours(year, data, "4月", "developTime")
+        let MayDevTimeSum = this.statsPropOfReachHours(year, data, "5月", "developTime")
+        let JunDevTimeSum = this.statsPropOfReachHours(year, data, "6月", "developTime")
+        let JulDevTimeSum = this.statsPropOfReachHours(year, data, "7月", "developTime")
+        let AugDevTimeSum = this.statsPropOfReachHours(year, data, "8月", "developTime")
+        let SepDevTimeSum = this.statsPropOfReachHours(year, data, "9月", "developTime")
+        let OctDevTimeSum = this.statsPropOfReachHours(year, data, "10月", "developTime")
+        let NovDevTimeSum = this.statsPropOfReachHours(year, data, "11月", "developTime")
+        let DecDevTimeSum = this.statsPropOfReachHours(year, data, "12月", "developTime")
+        let yearDevTimeSum = JanDevTimeSum + FebDevTimeSum + MarDevTimeSum + AprDevTimeSum + MayDevTimeSum + JunDevTimeSum + JulDevTimeSum + AugDevTimeSum + SepDevTimeSum + OctDevTimeSum + NovDevTimeSum + DecDevTimeSum
+        let yearPropOfReachHours = yearDevTimeSum / yearWorkTimeSum
 
-          let PropOfReachHoursMonthInfo = {
-            JanWorkTimeSum, 
-            FebWorkTimeSum, 
-            MarWorkTimeSum, 
-            AprWorkTimeSum, 
-            MayWorkTimeSum, 
-            JunWorkTimeSum, 
-            JulWorkTimeSum, 
-            AugWorkTimeSum, 
-            SepWorkTimeSum, 
-            OctWorkTimeSum, 
-            NovWorkTimeSum, 
-            DecWorkTimeSum, 
-            yearWorkTimeSum,
-            JanDevTimeSum, 
-            FebDevTimeSum, 
-            MarDevTimeSum, 
-            AprDevTimeSum, 
-            MayDevTimeSum, 
-            JunDevTimeSum, 
-            JulDevTimeSum, 
-            AugDevTimeSum, 
-            SepDevTimeSum, 
-            OctDevTimeSum, 
-            NovDevTimeSum, 
-            DecDevTimeSum, 
-            yearDevTimeSum,
-            yearPropOfReachHours,
-            year,
-          }
-          return PropOfReachHoursMonthInfo
-          // 将数据存储起来
-          // let params = {
-          //   userID: this.$store.getters.id,
-          //   projectID: this.passData.projectId,
-          //   tableDate: this.dialogTableData,
-          //   MonthInfo
-          // };
-          // let res = await updatePropOfReachHours(params)
-          // if(res.code === 200) {
-          //   this.$message.success(res.message);
-          // } else {
-          //   this.$message.error(res.message);
-          // }
-        // }
+        let MonthInfo = {
+          JanWorkTimeSum, 
+          FebWorkTimeSum, 
+          MarWorkTimeSum, 
+          AprWorkTimeSum, 
+          MayWorkTimeSum, 
+          JunWorkTimeSum, 
+          JulWorkTimeSum, 
+          AugWorkTimeSum, 
+          SepWorkTimeSum, 
+          OctWorkTimeSum, 
+          NovWorkTimeSum, 
+          DecWorkTimeSum, 
+          yearWorkTimeSum,
+          JanDevTimeSum, 
+          FebDevTimeSum, 
+          MarDevTimeSum, 
+          AprDevTimeSum, 
+          MayDevTimeSum, 
+          JunDevTimeSum, 
+          JulDevTimeSum, 
+          AugDevTimeSum, 
+          SepDevTimeSum, 
+          OctDevTimeSum, 
+          NovDevTimeSum, 
+          DecDevTimeSum, 
+          yearDevTimeSum,
+          yearPropOfReachHours,
+          year,
+        }
+        // 将数据存储起来
+        let params = {
+          userID: this.$store.getters.id,
+          projectID: this.passData.projectId,
+          tableDate: this.dialogTableData,
+          MonthInfo
+        };
+        let res = await updatePropOfReachHours(params)
+        if(res.code === 200) {
+          this.$message.success(res.message);
+        } else {
+          this.$message.error(res.message);
+        }
+       }
+    },
+
+    updateStaticsData(newList) {
+      // 统计工资薪金
+      this.getSalarySum(newList)
+      // 五险一金
+      this.getInsurancesAndFund(newList)
+      // 其他相关费用
+      this.getOtherRelatedExpenses(newList)
+      // 统计研发工时占比
+      this.getPropOfReachHours(newList)
     },
 
     // 按照月份统计数据
@@ -631,12 +639,11 @@ export default {
         if(rows[i].year !== year) {
           continue
         }
-        if(rows[i].month === month) {
+        if(rows[i].date === month) {
           sum = sum + parseFloat(rows[i].salary)
           sum = sum + parseFloat(rows[i].performance)
         }
       }
-      // console.log(`sum====${year}-----${month}-----${sum}`)
       return sum
     },
     statsInsurancesAndFundByMonth(year, rows, month) {
@@ -648,7 +655,7 @@ export default {
         if(rows[i].year !== year) {
           continue
         }
-        if(rows[i].month === month) {
+        if(rows[i].date === month) {
           sum = sum + parseFloat(rows[i].retirement)
           sum = sum + parseFloat(rows[i].medical)
           sum = sum + parseFloat(rows[i].unemployment)
@@ -664,7 +671,7 @@ export default {
         return 0
       }
       for(let i = 0; i < rows.length; i++) {
-        if(rows[i].month === month) {
+        if(rows[i].date === month) {
           if(rows[i].year !== year) {
           continue
         }
@@ -684,7 +691,7 @@ export default {
         if(rows[i].year !== year) {
           continue
         }
-        if(rows[i].month === month) {
+        if(rows[i].date === month) {
           sum = sum + parseFloat(rows[i][element])
         }
       }

@@ -61,13 +61,12 @@ async function addDepreciationDetail(req, res, next) {
     } else {
         let { tableDate, projectID } = req.body;
         let sql = ''
-
         let count = 0
         let succCount = 0
         let failCount = 0
         for (let i = 0; i < tableDate.length; i++) {
             count++
-            sql = `insert into depreciation(projectId, date, projectNum, equipmentNum, equipmentName, expenseType, MonthlyDepreciation, workTime, developTime) values(${projectID}, '${tableDate[i].date}', '${tableDate[i].projectNum}', '${tableDate[i].equipmentNum}','${tableDate[i].equipmentName}','${tableDate[i].expenseType}','${tableDate[i].MonthlyDepreciation}','${tableDate[i].workTime}', '${tableDate[i].developTime}')`;
+            sql = `insert into depreciation(projectId, year, month, projectNum, equipmentNum, equipmentName, expenseType, MonthlyDepreciation, workTime, developTime) values(${projectID}, '${tableDate[i].year}', '${tableDate[i].month}', '${tableDate[i].projectNum}', '${tableDate[i].equipmentNum}','${tableDate[i].equipmentName}','${tableDate[i].expenseType}','${tableDate[i].MonthlyDepreciation}','${tableDate[i].workTime}', '${tableDate[i].developTime}')`;
             await querySql(sql)
                 .then(data => {
                     succCount++

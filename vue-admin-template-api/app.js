@@ -13,6 +13,6 @@ app.use(cors()); // 注入cors模块解决跨域
 app.use('/', routes);
 
 
-app.listen(8088, () => { // 监听8088端口
+app.listen(8089, () => { // 监听8088端口
 	console.log('服务已启动 http://localhost:8088');
 })
