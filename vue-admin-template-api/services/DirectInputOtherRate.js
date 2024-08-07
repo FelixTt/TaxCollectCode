@@ -65,14 +65,14 @@ async function addDirectInputOtherRateDetail(req, res, next) {
         let succCount = 0
         let failCount = 0
         for (let i = 0; i < tableDate.length; i++) {
-            count++
-            sql = `insert into directInputOtherRate(projectId, year, month, MoldDeveAndManu, MaintAndConstruct) values(${projectID}, '${tableDate[i].year}','${tableDate[i].month}','${tableDate[i].MoldDeveAndManu}', '${tableDate[i].MaintAndConstruct}')`;
-            await querySql(sql)
-                .then(data => {
-                    succCount++
-                }).catch(err => {
-                    failCount++
-                })
+        count++
+        sql = `insert into directInputOtherRate(projectId, year, month, MoldDeveAndManu, MaintAndConstruct, sum) values(${projectID}, '${tableDate[i].year}','${tableDate[i].month}','${tableDate[i].MoldDeveAndManu}', '${tableDate[i].MaintAndConstruct}', ${tableDate[i].sum})`;
+        await querySql(sql)
+            .then(data => {
+                succCount++
+            }).catch(err => {
+                failCount++
+            })
         }
         if (count !== tableDate.length) {
             res.json({

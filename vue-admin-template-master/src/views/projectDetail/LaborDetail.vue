@@ -17,6 +17,7 @@
         <el-table-column type="index" width="50"> </el-table-column>
         <el-table-column prop="year" label="年份"> </el-table-column>
         <el-table-column prop="month" label="月份"> </el-table-column>
+        <el-table-column prop="date" label="日期" width="90"> </el-table-column>
         <el-table-column prop="category" label="种类"> </el-table-column>
         <el-table-column prop="proof" label="凭证编号"> </el-table-column>
         <el-table-column prop="abstract" label="摘要"> </el-table-column>
@@ -81,6 +82,7 @@
         <el-table-column type="index" width="50"> </el-table-column>
         <el-table-column prop="year" label="年份"> </el-table-column>
         <el-table-column prop="month" label="月份"> </el-table-column>
+        <el-table-column prop="date" label="日期"> </el-table-column>
         <el-table-column prop="category" label="种类"> </el-table-column>
         <el-table-column prop="proof" label="凭证编号"> </el-table-column>
         <el-table-column prop="abstract" label="摘要"> </el-table-column>
@@ -213,6 +215,15 @@ export default {
         this.$message.warning("请导入数据后再添加！");
         return;
       }
+
+      // 对输入的数据进行计算，得到总和
+      let ocpTmpArr = this.dialogTableData
+      for(let i=0; i<ocpTmpArr.length; i++) {
+        let OtherThreeCostSum = parseFloat(ocpTmpArr[i].benefits) + parseFloat(ocpTmpArr[i].supplementaryMedicine) + parseFloat(ocpTmpArr[i].supplementaryRetirement)
+        ocpTmpArr[i].OtherThreeCostSum = OtherThreeCostSum
+      }
+      this.dialogTableData = ocpTmpArr
+
       let params = {
         userID: this.$store.getters.id,
         projectID: this.passData.projectId,
@@ -280,6 +291,7 @@ export default {
             JSON.stringify(tableData[i])
               .replace("年份", "year")
               .replace("月份", "month")
+              .replace("日期", "date")
               .replace("种类", "category")
               .replace("公积金", "fund")
               .replace("其他福利费", "benefits")

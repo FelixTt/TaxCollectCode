@@ -57,11 +57,17 @@
                 <el-dropdown-item command="Amortization">
                   4.摊销表
                 </el-dropdown-item>
+                <el-dropdown-item command="ProjectDesign">
+                  5.研发项目设计试验等费用
+                </el-dropdown-item>
                 <el-dropdown-item command="OtherRelatedExpenses">
-                  5.其他相关费用
+                  6.其他相关费用
                 </el-dropdown-item>
                 <el-dropdown-item command="ExpendDetail">
-                  6.研发支出和减扣金额
+                  7.研发支出和减扣金额
+                </el-dropdown-item>
+                <el-dropdown-item command="EntrustDevelop">
+                  8.委托研发支出明细表
                 </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -158,6 +164,10 @@
         :passData="this.params"
         v-else-if="clickItem === 'Amortization'"
       />
+      <ProjectDesign
+        :passData="this.params"
+        v-else-if="clickItem === 'ProjectDesign'"
+      />
       <OtherRelatedExpenses
         :passData="this.params"
         v-else-if="clickItem === 'OtherRelatedExpenses'"
@@ -165,6 +175,10 @@
       <ExpendDetail
         :passData="this.params"
         v-else-if="clickItem === 'ExpendDetail'"
+      />
+      <EntrustDevelop
+        :passData="this.params"
+        v-else-if="clickItem === 'EntrustDevelop'"
       />
 
       <el-empty description="请选择需要填报的信息表" v-else></el-empty>
@@ -194,6 +208,8 @@ import DirectInputFuel from "./DirectInputFuel";
 import DirectInputOtherRate from "./DirectInputOtherRate";
 import OtherRelatedExpenses from "./OtherRelatedExpenses";
 import ExpendDetail from "./ExpendDetail";
+import ProjectDesign from "./ProjectDesign";
+import EntrustDevelop from "./EntrustDevelop";
 
 import { formatDate } from "@/utils/validate";
 
@@ -209,6 +225,8 @@ export default {
     DirectInputOtherRate,
     OtherRelatedExpenses,
     ExpendDetail,
+    ProjectDesign,
+    EntrustDevelop,
   },
   data() {
     return {
@@ -263,11 +281,17 @@ export default {
         case "Amortization":
           clickItem = "摊销表";
           break;
+        case "ProjectDesign":
+          clickItem = "研发项目设计试验等费用";
+          break;
         case "OtherRelatedExpenses":
           clickItem = "其他相关费用表";
           break;
         case "ExpendDetail":
           clickItem = "研发支出和减扣金额";
+          break;
+        case "EntrustDevelop":
+          clickItem = "委托研发支出明细表";
           break;
         default:
           clickItem = "未知名表";

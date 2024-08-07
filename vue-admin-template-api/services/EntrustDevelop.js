@@ -12,7 +12,7 @@ const { decode } = require('../utils/user-jwt');
 
 
 // 查询任务列表
-function queryDirectInputMaterialList(req, res, next) {
+function queryEntrustDevelopList(req, res, next) {
     const err = validationResult(req);
     // 如果验证错误，empty不为空
     if (!err.isEmpty()) {
@@ -26,7 +26,7 @@ function queryDirectInputMaterialList(req, res, next) {
         pageSize = pageSize ? pageSize : 1;
         pageNo = pageNo ? pageNo : 1;
 
-        let query = `select * from directInputMaterial where projectId = ${projectID}`;
+        let query = `select * from EntrustDevelop where projectId = ${projectID}`;
         querySql(query)
             .then(data => {
                 if (!data || data.length === 0) {
@@ -52,8 +52,8 @@ function queryDirectInputMaterialList(req, res, next) {
     }
 }
 
-// 添加人工明细信息
-async function addDirectInputMaterialDetail(req, res, next) {
+// add
+async function addEntrustDevelopDetail(req, res, next) {
     const err = validationResult(req);
     if (!err.isEmpty()) {
         const [{ msg }] = err.errors;
@@ -61,13 +61,13 @@ async function addDirectInputMaterialDetail(req, res, next) {
     } else {
         let { tableDate, projectID } = req.body;
         let sql = ''
+
         let count = 0
         let succCount = 0
         let failCount = 0
-        // console.log("data====", tableDate)
         for (let i = 0; i < tableDate.length; i++) {
             count++
-            sql = `insert into directInputMaterial(projectId, year, month, date, category, projectNum, proof, abstract, materialsName, unit, quantity, price, sumPrice) values(${projectID},'${tableDate[i].year}','${tableDate[i].month}', '${tableDate[i].date}', '${tableDate[i].category}', '${tableDate[i].projectNum}','${tableDate[i].proof}', '${tableDate[i].abstract}', '${tableDate[i].materialsName}', '${tableDate[i].unit}', '${tableDate[i].quantity}','${tableDate[i].price}', ${tableDate[i].sumPrice})`;
+            sql = `insert into EntrustDevelop(projectId, year, month, date, category, projectNum, proof, abstract, domesticCompCost, abroadCompCost, abroadPerCost, sum) values(${projectID}, '${tableDate[i].year}','${tableDate[i].month}','${tableDate[i].date}', '${tableDate[i].category}', '${tableDate[i].projectNum}','${tableDate[i].proof}', '${tableDate[i].abstract}', ${tableDate[i].domesticCompCost},${tableDate[i].abroadCompCost},${tableDate[i].abroadPerCost},${tableDate[i].sum})`;
             await querySql(sql)
                 .then(data => {
                     succCount++
@@ -94,14 +94,15 @@ async function addDirectInputMaterialDetail(req, res, next) {
     }
 }
 
-function deleteDirectInputMaterialDetail(req, res, next) {
+function deleteEntrustDevelopDetail(req, res, next) {
     const err = validationResult(req);
     if (!err.isEmpty()) {
         const [{ msg }] = err.errors;
         next(boom.badRequest(msg));
     } else {
         let { projectID, id } = req.body;
-        const query = `delete from directInputMaterial where id='${id}'`;
+
+        const query = `delete from EntrustDevelop where id='${id}'`;
         querySql(query)
             .then(data => {
                 if (!data || data.length === 0) {
@@ -122,7 +123,7 @@ function deleteDirectInputMaterialDetail(req, res, next) {
 }
 
 module.exports = {
-    queryDirectInputMaterialList,
-    addDirectInputMaterialDetail,
-    deleteDirectInputMaterialDetail
+    queryEntrustDevelopList,
+    addEntrustDevelopDetail,
+    deleteEntrustDevelopDetail
 }

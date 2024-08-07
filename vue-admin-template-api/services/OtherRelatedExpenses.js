@@ -52,7 +52,7 @@ function queryOtherRelatedExpensesList(req, res, next) {
     }
 }
 
-// 添加人工明细信息
+// 其他相关费用
 async function addOtherRelatedExpensesDetail(req, res, next) {
     const err = validationResult(req);
     if (!err.isEmpty()) {
@@ -66,7 +66,7 @@ async function addOtherRelatedExpensesDetail(req, res, next) {
         let failCount = 0
         for (let i = 0; i < tableDate.length; i++) {
             count++
-            sql = `insert into OtherRelatedExpenses(projectId, year, month, profileCostEtc, achieveCostEtc, intellectualPropertyCostEtc, TravelExpenseEtc) values(${projectID}, '${tableDate[i].year}', '${tableDate[i].month}', '${tableDate[i].profileCostEtc}', '${tableDate[i].achieveCostEtc}', '${tableDate[i].intellectualPropertyCostEtc}','${tableDate[i].TravelExpenseEtc}')`;
+            sql = `insert into OtherRelatedExpenses(projectId, year, month, proof, abstract, category, projectNum, profileCostEtc, achieveCostEtc, intellectualPropertyCostEtc, TravelExpenseEtc, sum) values(${projectID}, '${tableDate[i].year}', '${tableDate[i].month}', '${tableDate[i].proof}', '${tableDate[i].abstract}', '${tableDate[i].category}', '${tableDate[i].projectNum}', '${tableDate[i].profileCostEtc}', '${tableDate[i].achieveCostEtc}', '${tableDate[i].intellectualPropertyCostEtc}','${tableDate[i].TravelExpenseEtc}', ${tableDate[i].sum})`;
             await querySql(sql)
                 .then(data => {
                     succCount++

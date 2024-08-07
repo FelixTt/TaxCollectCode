@@ -7,8 +7,10 @@ const DirectInputFuelService = require('../services/DirectInputFuel');
 const DirectInputOtherRateService = require('../services/DirectInputOtherRate');
 const DepreciationService = require('../services/Depreciation');
 const AmortizationService = require('../services/Amortization');
+const ProjectDesignService = require('../services/ProjectDesign');
 const OtherRelatedExpensesService = require('../services/OtherRelatedExpenses');
 const ExpendDetailService = require('../services/ExpendDetail');
+const EntrustDevelopService = require('../services/EntrustDevelop');
 
 // *************************人工明细表**********************************
 router.get('/queryLaborDetailList', LaborDetailService.queryLaborDetailList);
@@ -47,6 +49,11 @@ router.get('/queryAmortizationList', AmortizationService.queryAmortizationList);
 router.post('/addAmortizationDetail', AmortizationService.addAmortizationDetail);
 router.delete('/deleteAmortizationDetail', AmortizationService.deleteAmortizationDetail);
 
+// *************************研发项目设计试验等费用表**********************************
+router.get('/queryProjectDesignList', ProjectDesignService.queryProjectDesignList);
+router.post('/addProjectDesignDetail', ProjectDesignService.addProjectDesignDetail);
+router.delete('/deleteProjectDesignDetail', ProjectDesignService.deleteProjectDesignDetail);
+
 // *************************其他相关费用表**********************************
 router.get('/queryOtherRelatedExpensesList', OtherRelatedExpensesService.queryOtherRelatedExpensesList);
 router.post('/addOtherRelatedExpensesDetail', OtherRelatedExpensesService.addOtherRelatedExpensesDetail);
@@ -57,6 +64,11 @@ router.delete('/deleteOtherRelatedExpensesDetail', OtherRelatedExpensesService.d
 router.get('/queryExpendDetailList', ExpendDetailService.queryExpendDetailList);
 router.post('/addExpendDetailDetail', ExpendDetailService.addExpendDetailDetail);
 router.delete('/deleteExpendDetailDetail', ExpendDetailService.deleteExpendDetailDetail);
+
+// *************************委托研发表**********************************
+router.get('/queryEntrustDevelopList', EntrustDevelopService.queryEntrustDevelopList);
+router.post('/addEntrustDevelopDetail', EntrustDevelopService.addEntrustDevelopDetail);
+router.delete('/deleteEntrustDevelopDetail', EntrustDevelopService.deleteEntrustDevelopDetail);
 
 
 

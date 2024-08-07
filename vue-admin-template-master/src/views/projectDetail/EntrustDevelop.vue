@@ -17,6 +17,7 @@
         <el-table-column type="index" width="50"> </el-table-column>
         <el-table-column prop="year" label="年份"> </el-table-column>
         <el-table-column prop="month" label="月份"> </el-table-column>
+        <el-table-column prop="date" label="日期"> </el-table-column>
         <el-table-column prop="projectNum" label="研发项目序号">
         </el-table-column>
         <el-table-column prop="category" label="种类">
@@ -25,11 +26,13 @@
         </el-table-column>
         <el-table-column prop="abstract" label="摘要">
         </el-table-column>
-        <el-table-column prop="materialsName" label="材料名称">
+         <el-table-column prop="domesticCompCost" label="委托境内机构或个人进行研发活动所发生的费用">
         </el-table-column>
-        <el-table-column prop="unit" label="单位"> </el-table-column>
-        <el-table-column prop="quantity" label="数量"> </el-table-column>
-        <el-table-column prop="price" label="单价"> </el-table-column>
+        <el-table-column prop="abroadCompCost" label="委托境外机构进行研发活动所发生的费用">
+        </el-table-column>
+        <el-table-column prop="abroadPerCost" label="委托境外个人进行研发活动所发生的费用">
+        </el-table-column>
+			
         <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
             <el-button
@@ -63,6 +66,7 @@
         <el-table-column type="index" width="50"> </el-table-column>
         <el-table-column prop="year" label="年份"> </el-table-column>
         <el-table-column prop="month" label="月份"> </el-table-column>
+        <el-table-column prop="date" label="日期"> </el-table-column>
         <el-table-column prop="projectNum" label="研发项目序号">
         </el-table-column>
         <el-table-column prop="category" label="种类">
@@ -71,11 +75,12 @@
         </el-table-column>
         <el-table-column prop="abstract" label="摘要">
         </el-table-column>
-        <el-table-column prop="materialsName" label="材料名称">
+         <el-table-column prop="domesticCompCost" label="委托境内机构或个人进行研发活动所发生的费用">
         </el-table-column>
-        <el-table-column prop="unit" label="单位"> </el-table-column>
-        <el-table-column prop="quantity" label="数量"> </el-table-column>
-        <el-table-column prop="price" label="单价"> </el-table-column>
+        <el-table-column prop="abroadCompCost" label="委托境外机构进行研发活动所发生的费用">
+        </el-table-column>
+        <el-table-column prop="abroadPerCost" label="委托境外个人进行研发活动所发生的费用">
+        </el-table-column>
       </el-table>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogCancel">取 消</el-button>
@@ -90,16 +95,17 @@
 <script>
 import UploadExcelComponent from "@/components/UploadExcel/index.vue";
 import {
-  queryDirectInputMaterialList,
-  addDirectInputMaterialDetail,
-  deleteDirectInputMaterialDetail,
-} from "@/api/projectDetailApi/DirectInputMaterial";
+  queryEntrustDevelopList,
+  addEntrustDevelopDetail,
+  deleteEntrustDevelopDetail,
+} from "@/api/projectDetailApi/EntrustDevelop";
 
-import { updateDirectInputMaterial } from '@/api/updateStatisticsSummary/statisticsSummary.js'
+import { updateDepreciation } from '@/api/updateStatisticsSummary/statisticsSummary.js'
+
 import { formatDate } from "@/utils/validate";
 
 export default {
-  name: "DirectInputMaterial",
+  name: "entrustDevelop",
   components: { UploadExcelComponent },
   props: ["passData"],
   data() {
@@ -115,14 +121,14 @@ export default {
   },
   methods: {
     init() {
-      this.getDirectInputMaterial();
+      this.getEntrustDevelopList();
     },
-    getDirectInputMaterial() {
+    getEntrustDevelopList() {
       let params = {
         userID: this.$store.getters.id,
         projectID: this.passData.projectId,
       };
-      return queryDirectInputMaterialList(params)
+      return queryEntrustDevelopList(params)
         .then((res) => {
           if (res.data != null) {
             this.tableData = res.data.rows;
@@ -152,7 +158,6 @@ export default {
       let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
       let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
       // 对导入的时间做一个校验，导入的时间必须在项目开始时间和结束时间之间！
-      console.log("results", results)
       try {
         for(let i=0; i<results.length; i++) {
         let inputYear = parseInt(results[i]["年份"].split("年")[0])
@@ -162,38 +167,23 @@ export default {
         }
       }
       } catch (error) {
-        this.$message.error("导入失败，请检查导入数据格式是否正确");
+        this.$message.error("导入失败，请检查导入数据格式是否正确！");
         return
       }
       this.$message.success("导入成功！");
       let newData = this.dealData(results);
-      // this.calTotalPrice(newData)
       this.dialogTableData = newData;
     },
-    // calTotalPrice(rows) {
-    //   let sum = 0;
-    //   if(rows == undefined || rows.length === 0) {
-    //     return 0
-    //   }
-    //   for(let i = 0; i < rows.length; i++) {
-    //     if(rows[i].date === month) {
-    //       sum = sum + parseFloat(rows[i].salary)
-    //       sum = sum + parseFloat(rows[i].performance)
-    //     }
-    //   }
-    //   return sum
-    // },
     async save() {
       if (this.dialogTableData.length === 0) {
         this.$message.warning("请导入数据后再添加！");
         return;
       }
-
       // 对输入的数据进行计算，得到 三者合计
       let ocpTmpArr = this.dialogTableData
       for(let i=0; i<ocpTmpArr.length; i++) {
-        let sumPrice = parseFloat(ocpTmpArr[i].quantity) * parseFloat(ocpTmpArr[i].price)
-        ocpTmpArr[i].sumPrice = sumPrice
+        let sum = parseFloat(ocpTmpArr[i].domesticCompCost) + parseFloat(ocpTmpArr[i].abroadCompCost) + parseFloat(ocpTmpArr[i].abroadPerCost)
+        ocpTmpArr[i].sum = sum
       }
       this.dialogTableData = ocpTmpArr
 
@@ -202,36 +192,17 @@ export default {
         projectID: this.passData.projectId,
         tableDate: this.dialogTableData,
       };
-
       let succRes = null
       let newList = null
       try {
-        succRes = await addDirectInputMaterialDetail(params)
-        newList = await this.getDirectInputMaterial()
+        succRes = await addEntrustDevelopDetail(params)
+        newList = await this.getEntrustDevelopList()
         this.$message.success(succRes.message);
-        this.updateStaticsData(newList)
       } catch (error) {
-        this.$message.error("添加直投-材料表错误！", error);
+        this.$message.error("添加折旧表信息错误！", error);
       }
       this.dialogVisible = false;
       this.dialogTableData = [];
-
-      // addDirectInputMaterialDetail(params)
-      //   .then((res) => {
-      //     if (res.code == 200) {
-      //       this.pageNo = 1;
-      //       this.getDirectInputMaterial();
-      //       this.$message.success(res.message);
-      //     } else {
-      //       this.$message.error(res.msg);
-      //     }
-      //     this.dialogVisible = false;
-      //     this.dialogTableData = [];
-      //   })
-      //   .catch((err) => {
-      //     this.dialogTableData = [];
-      //     this.dialogVisible = false;
-      //   });
     },
 
     // 数据处理，替换key值
@@ -239,18 +210,26 @@ export default {
       let newData = [];
       try {
         for (let i = 0; i < tableData.length; i++) {
+          // 日期            date
+          // 研发项目序号     projectNum
+          // 设备编号         equipmentNum
+          // 研发设备名称     equipmentName
+          // 费用类型         expenseType
+          // 月折旧额 （元）    MonthlyDepreciation
+          // 工作工时         workTime
+          // 研发工时         developTime
           let _item = JSON.parse(
             JSON.stringify(tableData[i])
               .replace("年份", "year")
               .replace("月份", "month")
+              .replace("日期", "date")
               .replace("种类", "category")
               .replace("编号", "proof")
               .replace("摘要", "abstract")
               .replace("研发项目序号", "projectNum")
-              .replace("材料名称", "materialsName")
-              .replace("单位", "unit")
-              .replace("数量", "quantity")
-              .replace("单价", "price")
+              .replace("委托境内机构或个人进行研发活动所发生的费用", "domesticCompCost")
+              .replace("委托境外机构进行研发活动所发生的费用", "abroadCompCost")
+              .replace("委托境外个人进行研发活动所发生的费用", "abroadPerCost")
           );
           newData.push(_item);
         }
@@ -285,100 +264,11 @@ export default {
         id: tableData[index].id,
         projectID: this.passData.projectId,
       };
-      let succRes = await deleteDirectInputMaterialDetail(params)
+      let succRes = await deleteEntrustDevelopDetail(params)
       this.$message.success(succRes.message);
-      let newList = await this.getDirectInputMaterial()
-
-      // 更新汇总数据
-      this.updateStaticsData(newList)
+      this.getEntrustDevelopList()
     },
-    updateStaticsData(newList) {
-      this.calTotalPrice(newList)
-    },
-    async calTotalPrice(data) {
-      // 方案一[不好]
-      // // data 所有的数据
-      // // 先拿到所有的年份，去重，写进数据库
-      // let set = new Set()
-      // let yearArr = []
-      // for(let i=0; i<data.length; i++) {
-      //   set.add(data[i].year)
-      // }
-      // for(let val of set) {
-      //   yearArr.push(val)
-      // }
-      // console.log("set", yearArr)
-      // // 判断年份，按照年份统计
-      // for(let i=0; i<yearArr.length; i++) {
-
-      // }
-
-      // 方案二
-      // 获取项目的开始时间和结束时间，计算间隔差值
-      let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
-      let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
-      for(let i=0; i<endYear-startYear+1; i++) {
-        let year = (startYear + i) + "年"
-        let JanDirectInputMaterial = this.statsDirectInputMaterial(year, data, "1月")
-        let FebDirectInputMaterial = this.statsDirectInputMaterial(year, data, "2月")
-        let MarDirectInputMaterial = this.statsDirectInputMaterial(year, data, "3月")
-        let AprDirectInputMaterial = this.statsDirectInputMaterial(year, data, "4月")
-        let MayDirectInputMaterial = this.statsDirectInputMaterial(year, data, "5月")
-        let JunDirectInputMaterial = this.statsDirectInputMaterial(year, data, "6月")
-        let JulDirectInputMaterial = this.statsDirectInputMaterial(year, data, "7月")
-        let AugDirectInputMaterial = this.statsDirectInputMaterial(year, data, "8月")
-        let SepDirectInputMaterial = this.statsDirectInputMaterial(year, data, "9月")
-        let OctDirectInputMaterial = this.statsDirectInputMaterial(year, data, "10月")
-        let NovDirectInputMaterial = this.statsDirectInputMaterial(year, data, "11月")
-        let DecDirectInputMaterial = this.statsDirectInputMaterial(year, data, "12月")
-        let yearDirectInputMaterialSum = JanDirectInputMaterial + FebDirectInputMaterial + MarDirectInputMaterial + AprDirectInputMaterial + MayDirectInputMaterial + JunDirectInputMaterial + JulDirectInputMaterial + AugDirectInputMaterial + SepDirectInputMaterial + OctDirectInputMaterial + NovDirectInputMaterial + DecDirectInputMaterial
-        let MonthInfo = {
-          JanDirectInputMaterial,
-          FebDirectInputMaterial,
-          MarDirectInputMaterial,
-          AprDirectInputMaterial,
-          MayDirectInputMaterial,
-          JunDirectInputMaterial,
-          JulDirectInputMaterial,
-          AugDirectInputMaterial,
-          SepDirectInputMaterial,
-          OctDirectInputMaterial,
-          NovDirectInputMaterial,
-          DecDirectInputMaterial,
-          yearDirectInputMaterialSum,
-          year
-        }
-        // 将数据存储起来
-        let params = {
-          userID: this.$store.getters.id,
-          projectID: this.passData.projectId,
-          tableDate: this.dialogTableData,
-          MonthInfo
-        };
-        
-        let res = await updateDirectInputMaterial(params)
-        if(res.code === 200) {
-          this.$message.success(res.message);
-        } else {
-          this.$message.error(res.message);
-        }
-      }
-    },
-    statsDirectInputMaterial(year, rows, month){
-      let sum = 0;
-      if(rows == undefined || rows.length === 0) {
-        return 0
-      }
-      for(let i = 0; i < rows.length; i++) {
-        if(rows[i].year !== year) {
-          continue
-        }
-        if(rows[i].month === month) {
-          sum = sum + parseFloat(rows[i].price) * parseFloat(rows[i].quantity)
-        }
-      }
-      return sum
-    },
+    
     // 格式化展示时间
     showTableTime(time) {
       return formatDate(time);

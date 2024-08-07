@@ -30,12 +30,12 @@
             <span style="margin-left: 10px">{{ scope.row.projectNum }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="研发项目名称" width="300">
+        <el-table-column label="研发项目名称" >
           <template slot-scope="scope">
             <span style="margin-left: 10px">{{ scope.row.projectName }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="开始时间" sortable width="150">
+        <el-table-column label="开始时间" sortable width="140">
           <template slot-scope="scope">
             <i class="el-icon-time"></i>
             <span style="margin-left: 10px"
@@ -43,7 +43,7 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="结束时间" sortable width="150">
+        <el-table-column label="结束时间" sortable width="140">
           <template slot-scope="scope">
             <i class="el-icon-time"></i>
             <span style="margin-left: 10px"
@@ -51,12 +51,12 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="项目负责人" width="150">
+        <el-table-column label="项目负责人" width="120">
           <template slot-scope="scope">
             <span style="margin-left: 10px">{{ scope.row.projectLeader }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="进入填报" align="center">
+        <el-table-column label="进入填报" align="center" width="130">
           <template slot-scope="scope">
             <el-button
               size="mini"
@@ -66,7 +66,17 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="查看辅助帐明细表" align="center" width="140">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              @click="goToProjectDetailSum(scope.$index, scope.row)"
+            >
+              点击查看
+            </el-button>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="150">
           <template slot-scope="scope">
             <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">
               编辑
@@ -305,6 +315,15 @@ export default {
     goToFillProject(index, row) {
       this.$router.push({
         path: "/projectDetail",
+        query: {
+          params: JSON.stringify(row),
+        },
+      });
+    },
+    // 辅助帐明细表
+    goToProjectDetailSum(index, row) {
+      this.$router.push({
+        path: "/auxiliaryDetail",
         query: {
           params: JSON.stringify(row),
         },

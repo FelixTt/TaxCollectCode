@@ -19,21 +19,21 @@
         <el-table-column prop="month" label="月份"> </el-table-column>
         <el-table-column prop="equipmentName" label="设备名称">
         </el-table-column>
-        <el-table-column prop="energyConsumption" label="当月能耗（KWH）">
+        <el-table-column prop="energyConsumption" label="当月燃料、动力能耗（KWH/吨/立方米）">
         </el-table-column>
-        <el-table-column prop="electricityRate" label="电费金额">
+        <el-table-column prop="electricityRate" label="单价">
         </el-table-column>
         <el-table-column prop="workingHours" label="工作工时">
         </el-table-column>
         <el-table-column prop="developmentHours" label="研发工时">
         </el-table-column>
-        <el-table-column prop="waterRate" label="研发分配水费（元）">
+        <!-- <el-table-column prop="waterRate" label="研发分配水费（元）">
         </el-table-column>
         <el-table-column
           prop="otherFuelPower"
           label="研发分配其他燃料动力（元）"
         >
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
             <el-button
@@ -69,7 +69,7 @@
         <el-table-column prop="month" label="月份"> </el-table-column>
         <el-table-column prop="equipmentName" label="设备名称">
         </el-table-column>
-        <el-table-column prop="energyConsumption" label="当月能耗（KWH）">
+        <el-table-column prop="energyConsumption" label="当月燃料、动力能耗（KWH/吨/立方米）">
         </el-table-column>
         <el-table-column prop="electricityRate" label="电费金额">
         </el-table-column>
@@ -77,13 +77,13 @@
         </el-table-column>
         <el-table-column prop="developmentHours" label="研发工时">
         </el-table-column>
-        <el-table-column prop="waterRate" label="研发分配水费（元）">
+        <!-- <el-table-column prop="waterRate" label="研发分配水费（元）">
         </el-table-column>
         <el-table-column
           prop="otherFuelPower"
           label="研发分配其他燃料动力（元）"
         >
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogCancel">取 消</el-button>
@@ -181,6 +181,19 @@ export default {
         this.$message.warning("请导入数据后再添加！");
         return;
       }
+
+      // 对输入的数据进行计算，得到总和
+      let ocpTmpArr = this.dialogTableData
+      for(let i=0; i<ocpTmpArr.length; i++) {
+        let consumeSum = parseFloat(ocpTmpArr[i].energyConsumption) * parseFloat(ocpTmpArr[i].electricityRate)
+        let occp = parseFloat(ocpTmpArr[i].developmentHours) / parseFloat(ocpTmpArr[i].workingHours)
+        let realConsumeSum = consumeSum * occp
+        ocpTmpArr[i].consumeSum = consumeSum
+        ocpTmpArr[i].occp = occp
+        ocpTmpArr[i].realConsumeSum = realConsumeSum
+      }
+      this.dialogTableData = ocpTmpArr
+
       let params = {
         userID: this.$store.getters.id,
         projectID: this.passData.projectId,
@@ -394,12 +407,12 @@ export default {
               .replace("年份", "year")
               .replace("月份", "month")
               .replace("设备名称", "equipmentName")
-              .replace("当月能耗（KWH）", "energyConsumption")
-              .replace("电费金额", "electricityRate")
+              .replace("当月燃料、动力能耗（KWH/吨/立方米）", "energyConsumption")
+              .replace("单价", "electricityRate")
               .replace("工作工时", "workingHours")
               .replace("研发工时", "developmentHours")
-              .replace("研发分配水费（元）", "waterRate")
-              .replace("研发分配其他燃料动力（元）", "otherFuelPower")
+              // .replace("研发分配水费（元）", "waterRate")
+              // .replace("研发分配其他燃料动力（元）", "otherFuelPower")
           );
           newData.push(_item);
         }

@@ -17,6 +17,12 @@
         <el-table-column type="index" width="50"> </el-table-column>
         <el-table-column prop="year" label="年份"> </el-table-column>
         <el-table-column prop="month" label="月份"> </el-table-column>
+        <el-table-column prop="category" label="种类">
+        </el-table-column>
+        <el-table-column prop="proof" label="编号">
+        </el-table-column>
+        <el-table-column prop="abstract" label="摘要">
+        </el-table-column>
         <el-table-column prop="projectNum" label="研发项目序号">
         </el-table-column>
         <el-table-column prop="IntangibleAssetsNum" label="无形资产编号">
@@ -69,6 +75,12 @@
         <el-table-column type="index" width="50"> </el-table-column>
         <el-table-column prop="year" label="年份"> </el-table-column>
         <el-table-column prop="month" label="月份"> </el-table-column>
+        <el-table-column prop="category" label="种类">
+        </el-table-column>
+        <el-table-column prop="proof" label="编号">
+        </el-table-column>
+        <el-table-column prop="abstract" label="摘要">
+        </el-table-column>
         <el-table-column prop="projectNum" label="研发项目序号">
         </el-table-column>
         <el-table-column prop="IntangibleAssetsNum" label="无形资产编号">
@@ -186,6 +198,17 @@ export default {
         this.$message.warning("请导入数据后再添加！");
         return;
       }
+      // 对输入的数据进行计算占比，得到 自有设备研发折旧额（元）
+      let ocpTmpArr = this.dialogTableData
+      for(let i=0; i<ocpTmpArr.length; i++) {
+        let rate = parseFloat(ocpTmpArr[i].developTime) / parseFloat(ocpTmpArr[i].workTime)
+        let realMonthlyAmortization = ocpTmpArr[i].MonthlyDepreciation * rate
+        ocpTmpArr[i].rate = rate
+        ocpTmpArr[i].realMonthlyAmortization = realMonthlyAmortization.toFixed(2)
+      }
+      // console.log("ocpTmpArr", ocpTmpArr)
+      this.dialogTableData = ocpTmpArr
+
       let params = {
         userID: this.$store.getters.id,
         projectID: this.passData.projectId,
@@ -293,6 +316,9 @@ export default {
             JSON.stringify(tableData[i])
               .replace("年份", "year")
               .replace("月份", "month")
+              .replace("种类", "category")
+              .replace("编号", "proof")
+              .replace("摘要", "abstract")
               .replace("研发项目序号", "projectNum")
               .replace("无形资产编号", "IntangibleAssetsNum")
               .replace("无形资产名称", "IntangibleAssetsName")

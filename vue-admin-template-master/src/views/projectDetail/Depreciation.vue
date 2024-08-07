@@ -17,6 +17,13 @@
         <el-table-column type="index" width="50"> </el-table-column>
         <el-table-column prop="year" label="年份"> </el-table-column>
         <el-table-column prop="month" label="月份"> </el-table-column>
+        <el-table-column prop="category" label="种类">
+        </el-table-column>
+        <!-- 凭证编号 -->
+        <el-table-column prop="proof" label="编号">
+        </el-table-column>
+        <el-table-column prop="abstract" label="摘要">
+        </el-table-column>
         <el-table-column prop="projectNum" label="研发项目序号">
         </el-table-column>
         <el-table-column prop="equipmentNum" label="设备编号">
@@ -63,9 +70,15 @@
         <el-table-column prop="month" label="月份"> </el-table-column>
         <el-table-column prop="projectNum" label="研发项目序号">
         </el-table-column>
-        <el-table-column prop="equipmentNum" label="设备编号">
+        <el-table-column prop="category" label="种类">
+        </el-table-column>
+        <el-table-column prop="proof" label="编号">
+        </el-table-column>
+        <el-table-column prop="abstract" label="摘要">
         </el-table-column>
         <el-table-column prop="equipmentName" label="研发设备名称">
+        </el-table-column>
+        <el-table-column prop="equipmentNum" label="设备编号">
         </el-table-column>
         <el-table-column prop="expenseType" label="费用类型"> </el-table-column>
         <el-table-column
@@ -169,6 +182,7 @@ export default {
       }
       this.$message.success("导入成功！");
       let newData = this.dealData(results);
+      console.log("asdfafa", newData)
       this.dialogTableData = newData;
     },
     async save() {
@@ -176,6 +190,16 @@ export default {
         this.$message.warning("请导入数据后再添加！");
         return;
       }
+      // 对输入的数据进行计算占比，得到 自有设备研发折旧额（元）
+      let ocpTmpArr = this.dialogTableData
+      for(let i=0; i<ocpTmpArr.length; i++) {
+        let rate = parseFloat(ocpTmpArr[i].developTime) / parseFloat(ocpTmpArr[i].workTime)
+        let realMonthlyDepreciation = ocpTmpArr[i].MonthlyDepreciation * rate
+        ocpTmpArr[i].rate = rate
+        ocpTmpArr[i].realMonthlyDepreciation = realMonthlyDepreciation.toFixed(2)
+      }
+      this.dialogTableData = ocpTmpArr
+
       let params = {
         userID: this.$store.getters.id,
         projectID: this.passData.projectId,
@@ -229,6 +253,9 @@ export default {
             JSON.stringify(tableData[i])
               .replace("年份", "year")
               .replace("月份", "month")
+              .replace("种类", "category")
+              .replace("编号", "proof")
+              .replace("摘要", "abstract")
               .replace("研发项目序号", "projectNum")
               .replace("设备编号", "equipmentNum")
               .replace("研发设备名称", "equipmentName")

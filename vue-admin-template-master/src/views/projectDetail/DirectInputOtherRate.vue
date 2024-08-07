@@ -168,6 +168,15 @@ export default {
         this.$message.warning("请导入数据后再添加！");
         return;
       }
+
+      // 对输入的数据进行计算，得到总和
+      let ocpTmpArr = this.dialogTableData
+      for(let i=0; i<ocpTmpArr.length; i++) {
+        let sum = parseFloat(ocpTmpArr[i].MaintAndConstruct) + parseFloat(ocpTmpArr[i].MoldDeveAndManu)
+        ocpTmpArr[i].sum = sum
+      }
+      this.dialogTableData = ocpTmpArr
+
       let params = {
         userID: this.$store.getters.id,
         projectID: this.passData.projectId,

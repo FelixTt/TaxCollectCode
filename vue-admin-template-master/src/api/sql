@@ -1,0 +1,52 @@
+要将两张表的数据通过聚合分组后，再通过同一个`id`连接起来，可以使用SQL中的`JOIN`操作。假设您有两张表`table1`和`table2`，并且它们都有一个共同的`id`字段。您可以先对每张表进行聚合分组，然后再通过`id`字段进行连接。
+
+以下是一个示例，假设您要对`table1`和`table2`分别按`id`和其他字段进行聚合分组，然后通过`id`字段连接起来：
+
+```sql
+-- 对table1进行聚合分组
+WITH aggregated_table1 AS (
+    SELECT 
+        id,
+        SUM(column1) AS sum_column1,
+        AVG(column2) AS avg_column2
+    FROM 
+        table1
+    GROUP BY 
+        id
+),
+
+-- 对table2进行聚合分组
+aggregated_table2 AS (
+    SELECT 
+        id,
+        SUM(column3) AS sum_column3,
+        AVG(column4) AS avg_column4
+    FROM 
+        table2
+    GROUP BY 
+        id
+)
+
+-- 通过id字段连接两张表的聚合结果
+SELECT 
+    a1.id,
+    a1.sum_column1,
+    a1.avg_column2,
+    a2.sum_column3,
+    a2.avg_column4
+FROM 
+    aggregated_table1 a1
+JOIN 
+    aggregated_table2 a2
+ON 
+    a1.id = a2.id;
+```
+
+在这个示例中：
+
+1. 使用`WITH`子句创建两个临时表`aggregated_table1`和`aggregated_table2`，分别对`table1`和`table2`进行聚合分组。
+2. 在`aggregated_table1`中，按`id`字段对`column1`进行求和，对`column2`进行求平均值。
+3. 在`aggregated_table2`中，按`id`字段对`column3`进行求和，对`column4`进行求平均值。
+4. 最后，通过`id`字段将两个临时表连接起来，并选择所需的列。
+
+这样，您就可以将两张表的数据通过聚合分组后，再通过同一个`id`字段连接起来。

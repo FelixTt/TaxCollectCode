@@ -66,7 +66,7 @@ async function addDepreciationDetail(req, res, next) {
         let failCount = 0
         for (let i = 0; i < tableDate.length; i++) {
             count++
-            sql = `insert into depreciation(projectId, year, month, projectNum, equipmentNum, equipmentName, expenseType, MonthlyDepreciation, workTime, developTime) values(${projectID}, '${tableDate[i].year}', '${tableDate[i].month}', '${tableDate[i].projectNum}', '${tableDate[i].equipmentNum}','${tableDate[i].equipmentName}','${tableDate[i].expenseType}','${tableDate[i].MonthlyDepreciation}','${tableDate[i].workTime}', '${tableDate[i].developTime}')`;
+            sql = `insert into depreciation(projectId, year, month, proof, abstract, category, projectNum, equipmentNum, equipmentName, expenseType, MonthlyDepreciation, workTime, developTime, rate, realMonthlyDepreciation) values(${projectID}, '${tableDate[i].year}', '${tableDate[i].month}', '${tableDate[i].proof}', '${tableDate[i].abstract}', '${tableDate[i].category}','${tableDate[i].projectNum}', '${tableDate[i].equipmentNum}','${tableDate[i].equipmentName}','${tableDate[i].expenseType}','${tableDate[i].MonthlyDepreciation}','${tableDate[i].workTime}', '${tableDate[i].developTime}', ${tableDate[i].rate}, ${tableDate[i].realMonthlyDepreciation})`;
             await querySql(sql)
                 .then(data => {
                     succCount++

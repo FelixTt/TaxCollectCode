@@ -52,7 +52,7 @@ function queryDirectInputFuelList(req, res, next) {
     }
 }
 
-// 添加人工明细信息
+// 添加
 async function addDirectInputFuelDetail(req, res, next) {
     const err = validationResult(req);
     if (!err.isEmpty()) {
@@ -66,7 +66,8 @@ async function addDirectInputFuelDetail(req, res, next) {
         let failCount = 0
         for (let i = 0; i < tableDate.length; i++) {
             count++
-            sql = `insert into directInputFuel(projectId, year, month, equipmentName, energyConsumption, electricityRate, workingHours, developmentHours, waterRate, otherFuelPower) values(${projectID}, '${tableDate[i].year}', '${tableDate[i].month}', '${tableDate[i].equipmentName}', '${tableDate[i].energyConsumption}', '${tableDate[i].electricityRate}','${tableDate[i].workingHours}', '${tableDate[i].developmentHours}','${tableDate[i].waterRate}', '${tableDate[i].otherFuelPower}')`;
+            sql = `insert into directInputFuel(projectId, year, month, equipmentName, energyConsumption, electricityRate, workingHours, developmentHours, consumeSum, occp, realConsumeSum) values(${projectID}, '${tableDate[i].year}', '${tableDate[i].month}', '${tableDate[i].equipmentName}', '${tableDate[i].energyConsumption}', '${tableDate[i].electricityRate}','${tableDate[i].workingHours}', '${tableDate[i].developmentHours}',${tableDate[i].consumeSum}, ${tableDate[i].occp}, ${tableDate[i].realConsumeSum})`;
+            // sql = `insert into directInputFuel(projectId, year, month, equipmentName, energyConsumption, electricityRate, workingHours, developmentHours, waterRate, otherFuelPower) values(${projectID}, '${tableDate[i].year}', '${tableDate[i].month}', '${tableDate[i].equipmentName}', '${tableDate[i].energyConsumption}', '${tableDate[i].electricityRate}','${tableDate[i].workingHours}', '${tableDate[i].developmentHours}','${tableDate[i].waterRate}', '${tableDate[i].otherFuelPower}')`;
             await querySql(sql)
                 .then(data => {
                     succCount++

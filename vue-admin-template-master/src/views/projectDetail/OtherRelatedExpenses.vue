@@ -17,6 +17,14 @@
         <el-table-column type="index" width="50"> </el-table-column>
         <el-table-column prop="year" label="年份"> </el-table-column>
         <el-table-column prop="month" label="月份"> </el-table-column>
+        <el-table-column prop="projectNum" label="研发项目序号">
+        </el-table-column>
+        <el-table-column prop="category" label="种类">
+        </el-table-column>
+        <el-table-column prop="proof" label="编号">
+        </el-table-column>
+        <el-table-column prop="abstract" label="摘要">
+        </el-table-column>
         <el-table-column prop="profileCostEtc" label="技术图书资料费、资料翻译费、专家咨询费、高新科技研发保险费">
         </el-table-column>
         <el-table-column prop="achieveCostEtc" label="研发成果的检索、分析、评议、论证、鉴定、评审、评估、验收费用"> </el-table-column>
@@ -55,6 +63,14 @@
         <el-table-column type="index" width="50"> </el-table-column>
         <el-table-column prop="year" label="年份"> </el-table-column>
         <el-table-column prop="month" label="月份"> </el-table-column>
+        <el-table-column prop="projectNum" label="研发项目序号">
+        </el-table-column>
+        <el-table-column prop="category" label="种类">
+        </el-table-column>
+        <el-table-column prop="proof" label="编号">
+        </el-table-column>
+        <el-table-column prop="abstract" label="摘要">
+        </el-table-column>
         <el-table-column prop="profileCostEtc" label="技术图书资料费、资料翻译费、专家咨询费、高新科技研发保险费">
         </el-table-column>
         <el-table-column prop="achieveCostEtc" label="研发成果的检索、分析、评议、论证、鉴定、评审、评估、验收费用"> </el-table-column>
@@ -158,6 +174,15 @@ export default {
         this.$message.warning("请导入数据后再添加！");
         return;
       }
+
+      // 对输入的数据进行计算，得到总和
+      let ocpTmpArr = this.dialogTableData
+      for(let i=0; i<ocpTmpArr.length; i++) {
+        let sum = parseFloat(ocpTmpArr[i].profileCostEtc) + parseFloat(ocpTmpArr[i].achieveCostEtc) + parseFloat(ocpTmpArr[i].intellectualPropertyCostEtc) + parseFloat(ocpTmpArr[i].TravelExpenseEtc)
+        ocpTmpArr[i].sum = sum
+      }
+      this.dialogTableData = ocpTmpArr
+
       let params = {
         userID: this.$store.getters.id,
         projectID: this.passData.projectId,
@@ -165,13 +190,13 @@ export default {
       };
       // 在填报其他相关费用之前，应该先填报人工明细表
       let labRes = await queryLaborDetailList(params)
-      // console.log("labRes", labRes)
       // if(labRes.data.rows.length === 0) {
       if(labRes.data == null) {
         this.$message.error("请先填报人工明细表后,再填报其他相关费用表！");
         return
       }
 
+      // 对人工表的福利费等进行统计
       let succRes = null
       let newList = null
       try {
@@ -289,6 +314,10 @@ export default {
             JSON.stringify(tableData[i])
               .replace("年份", "year")
               .replace("月份", "month")
+              .replace("种类", "category")
+              .replace("编号", "proof")
+              .replace("摘要", "abstract")
+              .replace("研发项目序号", "projectNum")
               .replace("技术图书资料费、资料翻译费、专家咨询费、高新科技研发保险费", "profileCostEtc")
               .replace("研发成果的检索、分析、评议、论证、鉴定、评审、评估、验收费用", "achieveCostEtc")
               .replace("知识产权的申请费、注册费、代理费", "intellectualPropertyCostEtc")

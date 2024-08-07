@@ -52,7 +52,7 @@ function queryAmortizationList(req, res, next) {
     }
 }
 
-// 添加人工明细信息
+// add
 async function addAmortizationDetail(req, res, next) {
     const err = validationResult(req);
     if (!err.isEmpty()) {
@@ -67,7 +67,7 @@ async function addAmortizationDetail(req, res, next) {
         let failCount = 0
         for (let i = 0; i < tableDate.length; i++) {
             count++
-            sql = `insert into amortization(projectId, year, month, projectNum, IntangibleAssetsNum, IntangibleAssetsName, IntangibleAssetsType, expenseType, MonthlyDepreciation, workTime, developTime) values(${projectID}, '${tableDate[i].year}','${tableDate[i].month}', '${tableDate[i].projectNum}', '${tableDate[i].IntangibleAssetsNum}','${tableDate[i].IntangibleAssetsName}','${tableDate[i].IntangibleAssetsType}','${tableDate[i].expenseType}','${tableDate[i].MonthlyDepreciation}','${tableDate[i].workTime}', '${tableDate[i].developTime}')`;
+            sql = `insert into amortization(projectId, year, month, proof, abstract, category, projectNum, IntangibleAssetsNum, IntangibleAssetsName, IntangibleAssetsType, expenseType, MonthlyDepreciation, workTime, developTime, rate, realMonthlyAmortization) values(${projectID}, '${tableDate[i].year}','${tableDate[i].month}', '${tableDate[i].proof}', '${tableDate[i].abstract}', '${tableDate[i].category}', '${tableDate[i].projectNum}', '${tableDate[i].IntangibleAssetsNum}','${tableDate[i].IntangibleAssetsName}','${tableDate[i].IntangibleAssetsType}','${tableDate[i].expenseType}','${tableDate[i].MonthlyDepreciation}','${tableDate[i].workTime}', '${tableDate[i].developTime}', ${tableDate[i].rate}, ${tableDate[i].realMonthlyAmortization})`;
             await querySql(sql)
                 .then(data => {
                     succCount++

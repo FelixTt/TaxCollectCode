@@ -169,6 +169,19 @@ export default {
         this.$message.warning("请导入数据后再添加！");
         return;
       }
+
+       // 对输入的数据进行计算占比，得到 自有设备研发折旧额（元）
+      let ocpTmpArr = this.dialogTableData
+      for(let i=0; i<ocpTmpArr.length; i++) {
+        let rate = parseFloat(ocpTmpArr[i].developmentHours) / parseFloat(ocpTmpArr[i].workingHours)
+        let realDirectInputlease = ocpTmpArr[i].monthlyDepreciation * rate
+        ocpTmpArr[i].rate = rate 
+        ocpTmpArr[i].realDirectInputlease = realDirectInputlease
+      }
+      // console.log("ocpTmpArr", ocpTmpArr)
+      this.dialogTableData = ocpTmpArr
+
+
       let params = {
         userID: this.$store.getters.id,
         projectID: this.passData.projectId,

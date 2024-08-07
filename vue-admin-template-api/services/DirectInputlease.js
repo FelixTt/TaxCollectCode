@@ -52,7 +52,7 @@ function queryDirectInputleaseList(req, res, next) {
     }
 }
 
-// 添加人工明细信息
+// 添加
 async function addDirectInputleaseDetail(req, res, next) {
     const err = validationResult(req);
     if (!err.isEmpty()) {
@@ -66,7 +66,7 @@ async function addDirectInputleaseDetail(req, res, next) {
         let failCount = 0
         for (let i = 0; i < tableDate.length; i++) {
             count++
-            sql = `insert into directInputlease(projectId, year, month, equipmentNumber, equipmentName, expenseType, monthlyDepreciation, workingHours, developmentHours) values(${projectID}, '${tableDate[i].year}','${tableDate[i].month}','${tableDate[i].equipmentNumber}', '${tableDate[i].equipmentName}', '${tableDate[i].expenseType}','${tableDate[i].monthlyDepreciation}', '${tableDate[i].workingHours}','${tableDate[i].developmentHours}')`;
+            sql = `insert into directInputlease(projectId, year, month, equipmentNumber, equipmentName, expenseType, monthlyDepreciation, workingHours, developmentHours, rate, totalrealDirectInputlease) values(${projectID}, '${tableDate[i].year}','${tableDate[i].month}','${tableDate[i].equipmentNumber}', '${tableDate[i].equipmentName}', '${tableDate[i].expenseType}','${tableDate[i].monthlyDepreciation}', '${tableDate[i].workingHours}','${tableDate[i].developmentHours}', ${tableDate[i].rate}, ${tableDate[i].totalrealDirectInputlease})`;
             await querySql(sql)
                 .then(data => {
                     succCount++
