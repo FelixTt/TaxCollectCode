@@ -13,6 +13,7 @@ const service = axios.create({
 // request interceptor
 service.interceptors.request.use(
   config => {
+    // console.log("request==========", config)
     // do something before request is sent
 
     // if (store.getters.token) {
@@ -48,12 +49,15 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
-    if (response.data.code == 401 || response.data.code === 403) {
+
+    // 抛出401错误，因为token失效，重新刷新页面，清空缓存，跳转到登录界面
+    if (res.code == 401 || res.code === 403) {
       store.dispatch('user/logout')
         .then(() => {
           location.reload();
         });
     }
+
     // if the custom code is not 20000, it is judged as an error.
     if (res.code !== 200) {
       Message({
@@ -76,13 +80,6 @@ service.interceptors.response.use(
         })
       }
 
-      // 抛出401错误，因为token失效，重新刷新页面，清空缓存，跳转到登录界面
-      // if (response.data.code == 401 || response.data.code === 403) {
-      //   store.dispatch('userInfo/logout')
-      //     .then(() => {
-      //       location.reload();
-      //     });
-      // }
 
       return Promise.reject(new Error(res.message || 'Error'))
     } else {
@@ -95,7 +92,6 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
     Message({
       message: error.message,
       type: 'error',

@@ -22,3 +22,57 @@ export function getInfo(token) {
 //     method: 'post'
 //   })
 // }
+
+// 查询所有用户列表
+export function queryUserList(params) {
+  return request({
+    url: `/queryUserList`,
+    method: "get",
+    params
+  })
+}
+
+// 根据id查找用户
+export function queryUserById(params) {
+  return request({
+    url: `/queryUserById`,
+    method: "get",
+    params
+  })
+}
+
+// 添加用户
+export function addUser(data) {
+  return request({
+    url: `/addUser`,
+    method: "post",
+    data
+  })
+}
+
+// 编辑用户
+export function editUser(data) {
+  return request({
+    url: `/editUser`,
+    method: "put",
+    data
+  })
+}
+
+// 重置用户密码
+export function resetUserPWD(data) {
+  return request({
+    url: `/resetUserPWD`,
+    method: "put",
+    data
+  })
+}
+
+// 删除用户
+export function deleteUser(data) {
+  return request({
+    url: `/deleteUser`,
+    method: "delete",
+    data
+  })
+}

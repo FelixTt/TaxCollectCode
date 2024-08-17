@@ -65,25 +65,38 @@ export const constantRoutes = [
     }]
   },
   {
-    path: '/dataDetail',
-    component: Layout,
-    redirect: '/dataDetail',
-    children: [{
-      path: '/dataDetail',
-      name: 'DataDetail',
-      component: () => import('@/views/dataDetail/index'),
-      meta: { title: '辅助帐明细', icon: 'dashboard' }
-    }]
-  },
-  {
     path: '/auxiliaryDetail',
     component: Layout,
-    hidden: true,
+    redirect: '/auxiliaryDetail',
     children: [{
       path: '/auxiliaryDetail',
       name: 'AuxiliaryDetail',
-      component: () => import('@/views/dataDetail/auxiliaryDetail.vue'),
-      meta: { title: '辅助帐明细表', icon: 'dashboard' }
+      component: () => import('@/views/dataDetail/auxiliaryDetail'),
+      hidden: true,
+      meta: { title: '辅助帐明细', icon: 'dashboard' }
+    }]
+  },
+  // {
+  //   path: '/dataDetail',
+  //   component: Layout,
+  //   redirect: '/dataDetail',
+  //   children: [{
+  //     path: '/dataDetail',
+  //     name: 'DataDetail',
+  //     component: () => import('@/views/dataDetail/index'),
+  //     hidden: true,
+  //     meta: { title: '辅助帐明细', icon: 'dashboard' }
+  //   }]
+  // },
+  {
+    path: '/auxiliarySummary',
+    component: Layout,
+    // hidden: true,
+    children: [{
+      path: '/auxiliarySummary',
+      name: 'AuxiliarySummary',
+      component: () => import('@/views/dataDetail/auxiliarySummary.vue'),
+      meta: { title: '辅助汇总表', icon: 'dashboard' }
     }]
   },
   {
@@ -97,6 +110,16 @@ export const constantRoutes = [
       hidden: true,
       component: () => import('@/views/projectDetail/index'),
       meta: { title: '项目费用填报', icon: 'dashboard' }
+    }]
+  },
+  {
+    path: '/userManage',
+    component: Layout,
+    children: [{
+      path: '/userManage',
+      name: 'UserManage',
+      component: () => import('@/views/userManage/index'),
+      meta: { title: '用户管理', icon: 'dashboard' }
     }]
   },
 

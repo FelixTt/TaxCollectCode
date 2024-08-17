@@ -72,13 +72,13 @@
               </el-dropdown-menu>
             </el-dropdown>
           </template>
-          <el-descriptions-item>
+          <!-- <el-descriptions-item>
             <template slot="label">
               <i class="el-icon-user"></i>
-              公司名称
+              用户名
             </template>
             {{ this.$store.getters.name }}
-          </el-descriptions-item>
+          </el-descriptions-item> -->
           <el-descriptions-item>
             <template slot="label">
               <i class="el-icon-mobile-phone"></i>
@@ -242,6 +242,7 @@ export default {
   methods: {
     initData() {
       this.params = JSON.parse(this.$route.query.params);
+      console.log("this.params", this.$route.query.params)
     },
     handleCommand(command) {
       let clickItem = "";

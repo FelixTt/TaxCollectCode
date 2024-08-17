@@ -20,8 +20,10 @@ function querySql(sql) {
       conn.query(sql, (err, res) => {
         console.log("@@@sql ========================= ", sql)
         if (err) {
+          // console.log("errrrr", err)
           reject(err);
         } else {
+          // console.log("resolve", res)
           resolve(res);
         }
       })

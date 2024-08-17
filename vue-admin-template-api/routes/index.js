@@ -27,11 +27,16 @@ router.use((err, req, res, next) => {
     console.log('UnauthorizedError')
     const { status = 401, message } = err;
     // 抛出401异常
-    res.status(status).json({
+    res.json({
       code: status,
       message: 'token失效，请重新登录',
       data: null
     })
+    // res.status(status).json({
+    //   code: status,
+    //   message: 'token失效，请重新登录',
+    //   data: null
+    // })
   } else {
     const { output } = err || {};
     // 错误码和错误信息

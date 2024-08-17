@@ -26,7 +26,6 @@ export function editProject(data) {
   })
 }
 
-
 // 删除项目
 export function deleteProject(data) {
   return request({

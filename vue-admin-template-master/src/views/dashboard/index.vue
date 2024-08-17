@@ -1,15 +1,161 @@
 <template>
   <div style="padding: 30px">
     <el-row :gutter="12" style="margin-bottom: 30px">
-      <el-card class="box-card" shadow="hover">
+      <!-- <el-card class="box-card" shadow="hover">
         <div slot="header" class="clearfix">
           <h3>企业信息</h3>
         </div>
         <div class="text item">
           <p>我是一家企业，符合加计扣除政策。</p>
         </div>
+      </el-card> -->
+      <el-card>
+        <el-descriptions
+          class="margin-top"
+          title="企业信息"
+          :column="2"
+          size="medium"
+          border
+        >
+          <template slot="extra">
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="点击修改企业信息"
+              placement="bottom"
+            >
+              <el-button
+                type="primary"
+                icon="el-icon-edit"
+                circle
+                @click="showDialog()"
+              ></el-button>
+            </el-tooltip>
+          </template>
+          <el-descriptions-item>
+            <template slot="label">
+              <i class="el-icon-mobile-phone"></i>
+              纳税识别号
+            </template>
+            {{ form.taxNum || " - " }}
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <template slot="label">
+              <i class="el-icon-user"></i>
+              公司名称
+            </template>
+            {{ form.companyName }}
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <template slot="label">
+              <i class="el-icon-tickets"></i>
+              注册地址
+            </template>
+            <el-tag size="small">
+              {{ form.registerLocation }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <template slot="label">
+              <i class="el-icon-phone"></i>
+              联系方式
+            </template>
+            <el-tag size="small">
+              {{ form.phoneNumber }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <template slot="label">
+              <i class="el-icon-office-building"></i>
+              备注信息
+            </template>
+            {{ form.noteInformation }}
+          </el-descriptions-item>
+        </el-descriptions>
       </el-card>
     </el-row>
+
+    <el-dialog title="修改信息" :visible.sync="dialogFormVisible" width="45%">
+      <el-form :model="dialogForm" :rules="ruleValidate" ref="editorUserForm">
+        <el-form-item
+          label="用户名"
+          :label-width="formLabelWidth"
+          prop="username"
+        >
+          <el-input
+            v-model="dialogForm.username"
+            autocomplete="off"
+            :style="inputWidth"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="纳税识别号"
+          :label-width="formLabelWidth"
+          style="100px"
+          prop="taxNum"
+        >
+          <el-input
+            v-model="dialogForm.taxNum"
+            autocomplete="off"
+            :style="inputWidth"
+            :disabled="true"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="公司名称"
+          :label-width="formLabelWidth"
+          prop="companyName"
+        >
+          <el-input
+            v-model="dialogForm.companyName"
+            autocomplete="off"
+            :style="inputWidth"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="注册地址"
+          :label-width="formLabelWidth"
+          prop="registerLocation"
+        >
+          <el-input
+            v-model="dialogForm.registerLocation"
+            autocomplete="off"
+            :style="inputWidth"
+          ></el-input>
+        </el-form-item>
+        <el-form-item
+          label="联系方式"
+          :label-width="formLabelWidth"
+          prop="phoneNumber"
+        >
+          <el-input
+            v-model="dialogForm.phoneNumber"
+            autocomplete="off"
+            :style="inputWidth"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="备注信息" :label-width="formLabelWidth">
+          <el-input
+            v-model="dialogForm.noteInformation"
+            autocomplete="off"
+            :style="inputWidth"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="修改密码" :label-width="formLabelWidth">
+          <el-input
+            v-model="dialogForm.password"
+            placeholder="若需修改密码请填写"
+            autocomplete="off"
+            :style="inputWidth"
+            show-password
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="resetForm()">取 消</el-button>
+        <el-button type="primary" @click="handleSubmit"> 确定 </el-button>
+      </div>
+    </el-dialog>
 
     <el-row :gutter="12" style="margin-bottom: 30px">
       <el-card class="box-card" shadow="hover">
@@ -94,17 +240,6 @@
         </div>
       </el-card>
     </el-row>
-
-    <!-- <el-row :gutter="12">
-      <el-card class="box-card" shadow="hover">
-        <div slot="header" class="clearfix">
-          <span>2</span>
-        </div>
-        <div v-for="o in 4" :key="o" class="text item">
-          {{ "列表内容 " + o }}
-        </div>
-      </el-card>
-    </el-row> -->
   </div>
 </template>
 
@@ -117,17 +252,17 @@ import {
   editProject,
   deleteProject,
 } from "@/api/projectApi/index.js";
+import { editUser } from "@/api/user";
+import { queryUserById } from "@/api/user";
 import { formatDate } from "@/utils/validate";
 
 export default {
   name: "Dashboard",
   created() {},
   mounted() {
+    this.getCompanyInfo();
     this.getProjectList();
   },
-  // computed: {
-  //   ...mapGetters(["name"]),
-  // },
   data() {
     return {
       isShow: false,
@@ -142,16 +277,71 @@ export default {
         position: "static",
       },
       tableData: [],
+      // 用于表单验证
       formValidate: {
-        projectNum: "",
-        projectName: "",
-        startDate: "",
-        endDate: "",
-        projectLeader: "",
+        username: "",
+        taxNum: "",
+        companyName: "",
+        registerLocation: "",
+        phoneNumber: "",
+      },
+      dialogFormVisible: false,
+      // 展示列表的数据
+      form: {
+        username: "",
+        password: "",
+        taxNum: "",
+        companyName: "",
+        registerLocation: "",
+        phoneNumber: "",
+        noteInformation: "",
+      },
+      // 对话框的数据
+      dialogForm: {
+        username: "",
+        password: "",
+        taxNum: "",
+        companyName: "",
+        registerLocation: "",
+        phoneNumber: "",
+        noteInformation: "",
+      },
+      formLabelWidth: "120px",
+      inputWidth: "50%",
+      ruleValidate: {
+        username: [
+          { required: true, message: "不能为空，请填写。", trigger: "blur" },
+        ],
+        taxNum: [
+          { required: true, message: "不能为空，请填写。", trigger: "blur" },
+        ],
+        companyName: [
+          { required: true, message: "不能为空，请填写。", trigger: "blur" },
+        ],
+        registerLocation: [
+          { required: true, message: "不能为空，请填写。", trigger: "blur" },
+        ],
+        phoneNumber: [
+          { required: true, message: "不能为空，请填写。", trigger: "blur" },
+        ],
       },
     };
   },
   methods: {
+    // 获取公司信息
+    async getCompanyInfo() {
+      let params = {
+        userID: this.$store.getters.id,
+      };
+      let res = await queryUserById(params);
+      this.form.username = res.data.rows[0].username;
+      this.form.taxNum = res.data.rows[0].taxNum;
+      this.form.companyName = res.data.rows[0].companyName;
+      this.form.registerLocation = res.data.rows[0].registerLocation;
+      this.form.phoneNumber = res.data.rows[0].phoneNumber;
+      this.form.noteInformation = res.data.rows[0].noteInformation;
+    },
+
     // 获取全部项目列表
     getProjectList() {
       this.loading = true;
@@ -184,6 +374,56 @@ export default {
     },
     formatter(row, column) {
       return row.address;
+    },
+
+    showDialog() {
+      this.dialogFormVisible = true;
+      // 给对话框的表格赋值
+      this.dialogForm.username = this.form.username;
+      this.dialogForm.taxNum = this.form.taxNum;
+      this.dialogForm.companyName = this.form.companyName;
+      this.dialogForm.registerLocation = this.form.registerLocation;
+      this.dialogForm.phoneNumber = this.form.phoneNumber;
+      this.dialogForm.noteInformation = this.form.noteInformation;
+    },
+    handleSubmit() {
+      this.$refs["editorUserForm"].validate((valid) => {
+        if (valid) {
+          let params = {
+            userID: this.$store.getters.id,
+            username: this.dialogForm.username,
+            password: this.dialogForm.password,
+            taxNum: this.dialogForm.taxNum,
+            companyName: this.dialogForm.companyName,
+            registerLocation: this.dialogForm.registerLocation,
+            phoneNumber: this.dialogForm.phoneNumber,
+            noteInformation: this.dialogForm.noteInformation,
+          };
+          editUser(params)
+            .then((res) => {
+              this.loading = false;
+              if (res.code == 200) {
+                this.pageNo = 1;
+                this.getCompanyInfo();
+                this.$message.success(`修改用户信息成功!`);
+              } else {
+                this.$message.error(res.msg);
+              }
+            })
+            .catch((err) => {
+              this.loading = false;
+            });
+          // 因为重置了对话框中的password参数，所以必须放到发送请求之后
+          this.resetForm();
+        } else {
+          return false;
+        }
+      });
+    },
+    resetForm() {
+      this.dialogFormVisible = false;
+      this.dialogForm.password = "";
+      this.$refs["editorUserForm"].resetFields();
     },
 
     // 填报项目明细
