@@ -112,16 +112,7 @@ export const constantRoutes = [
       meta: { title: '项目费用填报', icon: 'dashboard' }
     }]
   },
-  {
-    path: '/userManage',
-    component: Layout,
-    children: [{
-      path: '/userManage',
-      name: 'UserManage',
-      component: () => import('@/views/userManage/index'),
-      meta: { title: '用户管理', icon: 'dashboard' }
-    }]
-  },
+
 
   // {
   //   path: '/example',
@@ -173,14 +164,24 @@ export const constantRoutes = [
 ]
 
 export const asyncRoutes = [
+  // {
+  //   path: '/roleManage',
+  //   component: Layout,
+  //   children: [{
+  //     path: 'roleManage',
+  //     name: 'RoleManage',
+  //     component: () => import('@/views/projectManage/index'),
+  //     meta: { title: '人员管理', icon: 'dashboard', roles: ['admin'] }
+  //   }]
+  // },
   {
-    path: '/roleManage',
+    path: '/userManage',
     component: Layout,
     children: [{
-      path: 'roleManage',
-      name: 'RoleManage',
-      component: () => import('@/views/projectManage/index'),
-      meta: { title: '人员管理', icon: 'dashboard', roles: ['admin'] }
+      path: '/userManage',
+      name: 'UserManage',
+      component: () => import('@/views/userManage/index'),
+      meta: { title: '用户管理', icon: 'dashboard', roles: ['admin'] }
     }]
   },
 ]

@@ -32,6 +32,8 @@ router.post('/resetPwd', resetPwdVaildator, service.resetPwd);
 // 以下为对用户操作接口
 // 查询所有用户接口
 router.get('/queryUserList', service.queryUserList);
+// 根据id查询用户role
+router.get('/getUserRoleInfo', service.queryUserById);
 // 根据id查找用户
 router.get('/queryUserById', service.queryUserById);
 // 添加用户接口
@@ -42,8 +44,6 @@ router.put('/editUser', service.editUser);
 router.put('/resetUserPWD', service.resetUserPWD);
 // 删除用户接口
 router.delete('/deleteUser', service.deleteUser);
-
-
 
 module.exports = router;
 

@@ -16,6 +16,14 @@ export function getInfo(token) {
   })
 }
 
+export function getUserRoleInfo(params) {
+  return request({
+    url: '/getUserRoleInfo',
+    method: 'get',
+    params,
+  })
+}
+
 // export function logout() {
 //   return request({
 //     url: '/vue-admin-template/user/logout',
@@ -74,5 +82,13 @@ export function deleteUser(data) {
     url: `/deleteUser`,
     method: "delete",
     data
+  })
+}
+
+export function getRouteList(params) {
+  return request({
+    url: `/getRouteList`,
+    method: "get",
+    params
   })
 }

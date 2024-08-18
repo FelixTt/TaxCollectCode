@@ -32,7 +32,6 @@ router.beforeEach(async (to, from, next) => {
 
       // if (hasGetUserInfo) {
       const hasRoles = store.getters.roles && store.getters.roles.length > 0
-
       // let roles = store.getters.roles
       // const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
       // router.addRoutes(accessRoutes)
@@ -45,11 +44,14 @@ router.beforeEach(async (to, from, next) => {
           // 暂时将此处注释
           // await store.dispatch('user/getInfo')
           // next()
-
-          // // const { roles } = await store.dispatch('user/getInfo')
-          let roles = ['editor']
+          
+          // 这个获取roles，其实在登陆的时候就已经得到了，不需要重复发送请求
+          let res = await store.dispatch('user/getInfo')
+          let roles = []
+          roles.push(res.rows[0].roles)
+          // const { roles } = await store.dispatch('user/getInfo')
+          // let roles = ['admin']
           const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
-          // router.options.routes = constantRoutes.concat(accessRoutes)
           router.addRoutes(accessRoutes)
           next()
           // next({ ...to, replace: true })

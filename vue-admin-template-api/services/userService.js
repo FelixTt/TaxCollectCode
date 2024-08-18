@@ -31,7 +31,6 @@ function login(req, res, next) {
     // querySql(query)
     querySql(query)
       .then(user => {
-        console.log('用户登录=================', user);
         if (!user || user.length === 0) {
           res.json({
             code: CODE_ERROR,
@@ -39,7 +38,6 @@ function login(req, res, next) {
             data: null
           })
         } else {
-          console.log("else in....ohhhhh------------------------------")
           // 登录成功，签发一个token并返回给前端
           const token = jwt.sign(
             // payload：签发的 token 里面要包含的一些数据。
@@ -49,7 +47,7 @@ function login(req, res, next) {
             // 设置过期时间
             { expiresIn: JWT_EXPIRED }
           )
-
+          
           // 将角色权限返回
           let roles = []
           roles.push(user[0].roles)
@@ -58,11 +56,11 @@ function login(req, res, next) {
             id: user[0].id,
             username: user[0].username,
             roles: roles,
-            nickname: user[0].nickname,
-            avator: user[0].avator,
-            sex: user[0].sex,
-            gmt_create: user[0].gmt_create,
-            gmt_modify: user[0].gmt_modify
+            taxNum: user[0].taxNum,
+            companyName: user[0].companyName,
+            registerLocation: user[0].registerLocation,
+            phoneNumber: user[0].phoneNumber,
+            noteInformation: user[0].noteInformation
           };
 
           res.json({
@@ -91,11 +89,11 @@ function register(req, res, next) {
     let { username, password } = req.body;
     findUser(username)
       .then(data => {
-        console.log('用户注册============================================', data);
+        // console.log('用户注册============================================', data);
         if (data) {
           res.json({
             code: CODE_ERROR,
-            msg: '用户已存在',
+            msg: '该用户名已存在,请更换用户名！',
             data: null
           })
         } else {
@@ -281,7 +279,7 @@ function queryUserById(req, res, next) {
     pageSize = pageSize ? pageSize : 1;
     pageNo = pageNo ? pageNo : 1;
 
-    let query = `select u.username, u.password, u.taxNum, u.companyName, u.registerLocation, u.phoneNumber, u.noteInformation, u.roles from sys_user u where id=${userID}`;
+    let query = `select u.username, u.taxNum, u.companyName, u.registerLocation, u.phoneNumber, u.noteInformation, u.roles from sys_user u where id=${userID}`;
     // let query = `select u.username, u.password, u.taxNum, u.companyName, u.registerLocation, u.phoneNumber, u.noteInformation, u.roles from sys_user u`;
     // let query = `select * from sys_user where id=${userID}`;
     querySql(query)
@@ -289,7 +287,7 @@ function queryUserById(req, res, next) {
         if (!data || data.length === 0) {
           res.json({
             code: CODE_ERROR,
-            message: '暂无数据',
+            message: '未查询到数据!',
             data: null
           })
         } else {
@@ -317,8 +315,10 @@ function addUser(req, res, next) {
     next(boom.badRequest(msg));
   } else {
     let { username, taxNum, companyName } = req.body;
-    // console.log("========req.bodyreq.bodyreq.body==", req.body)
-    findUserByTaxNum(taxNum)
+    // 纳税识别号为唯一
+    // findUserByTaxNum(taxNum)
+    // 用户名为唯一
+    findUser(taxNum)
       .then(data => {
         if (data) {
           res.json({
@@ -475,6 +475,7 @@ function deleteUser(req, res, next) {
       })
   }
 }
+
 
 module.exports = {
   login,

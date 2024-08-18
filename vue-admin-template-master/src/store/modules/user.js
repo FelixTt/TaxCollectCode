@@ -1,4 +1,4 @@
-import { login, logout, getInfo } from '@/api/user'
+import { login, logout, getUserRoleInfo } from '@/api/user'
 import { getToken, setToken, removeToken, getUserName, setUserName, removeUserName, getID, setID, removeID } from '@/utils/auth'
 import { resetRouter } from '@/router'
 import store from '..'
@@ -43,10 +43,11 @@ const actions = {
     return login({ username: username.trim(), password: password }).then(response => {
       const { data } = response
       if (response && response.data !== null) {
+        console.log("datadata", this.name)
         commit('SET_TOKEN', data.token)
         commit('SET_NAME', data.userData.username)
         commit('SET_ID', data.userData.id)
-        commit('SET_ROLES', data.userData.roles)
+        // commit('SET_ROLES', data.userData.roles)
         setToken(data.token)
         setID(data.userData.id)
         setUserName(data.userData.username)
@@ -64,7 +65,12 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
+      let params = {
+        userID: state.id,
+      }
+      // 不太理解之前的代码这里要发送token
+      // getInfo(state.token).then(response => {
+      getUserRoleInfo(params).then(response => {
         const { data } = response
 
         if (!data) {

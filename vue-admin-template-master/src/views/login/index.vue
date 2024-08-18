@@ -68,6 +68,7 @@
 <script>
 // import { Message } from "element-ui";
 // import { validUsername } from "@/utils/validate";
+import { getRouteList } from "@/api/user"
 
 export default {
   name: "Login",
