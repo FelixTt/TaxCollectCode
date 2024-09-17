@@ -49,10 +49,19 @@ export function queryUserById(params) {
   })
 }
 
-// 添加用户
+// 管理员添加普通用户
 export function addUser(data) {
   return request({
     url: `/addUser`,
+    method: "post",
+    data
+  })
+}
+
+// 超级管理员批量添加公司管理员
+export function multiAddCompanyAdmin(data) {
+  return request({
+    url: `/multiAddCompanyAdmin`,
     method: "post",
     data
   })
@@ -108,3 +117,4 @@ export function updateAssginProject(data) {
     data
   })
 }
+

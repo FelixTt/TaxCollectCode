@@ -38,6 +38,8 @@ router.get('/getUserRoleInfo', service.queryUserById);
 router.get('/queryUserById', service.queryUserById);
 // 添加用户接口
 router.post('/addUser', service.addUser);
+// 超级管理员批量添加公司管理员
+router.post('/multiAddCompanyAdmin', service.multiAddCompanyAdmin);
 // 编辑用户接口
 router.put('/editUser', service.editUser);
 // 重置用户密码
@@ -46,6 +48,5 @@ router.put('/resetUserPWD', service.resetUserPWD);
 router.delete('/deleteUser', service.deleteUser);
 // 管理员分配项目权限接口
 router.put('/updateAssginProject', service.updateAssginProject);
-
 module.exports = router;
 

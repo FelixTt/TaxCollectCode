@@ -9,6 +9,7 @@
             icon="md-add"
             size="medium"
             @click="addUserOnce"
+            v-show="this.$store.getters.superAdmin !== 'true'"
           >
             添加用户
           </el-button>
@@ -16,9 +17,10 @@
             type="primary"
             icon="md-add"
             size="medium"
-            @click="addUserPlus"
+            @click="dialogVisible = true"
+            v-show="this.$store.getters.superAdmin === 'true'"
           >
-            批量添加用户
+            批量添加公司管理员用户
           </el-button>
         </div>
       </div>
@@ -82,7 +84,18 @@
           </template>
         </el-table-column>
 
-        <!-- 研发项目名称这里展示没有展示 -->
+        <el-table-column label="纳税识别号" align="center">
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ scope.row.taxNum }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="公司名称" align="center">
+          <template slot-scope="scope">
+            <span style="margin-left: 10px">{{ scope.row.companyName }}</span>
+          </template>
+        </el-table-column>
+
+        <!-- 研发项目名称这里没有展示，后续添加 -->
         <!-- <el-table-column label="研发管理项目名称" align="center">
           <template slot-scope="scope">
             <span style="margin-left: 10px">{{ scope.row.roles }}</span>
@@ -90,7 +103,12 @@
         </el-table-column> -->
 
         <!-- 管理员和用户可以对 项目授权管理 -->
-        <el-table-column label="操作" width="350" align="center" v-if="this.$store.getters.superAdmin !== 'true'">
+        <el-table-column
+          label="操作"
+          width="350"
+          align="center"
+          v-if="this.$store.getters.superAdmin !== 'true'"
+        >
           <template slot-scope="scope">
             <el-button
               size="mini"
@@ -174,6 +192,7 @@
       </el-table>
     </div>
 
+    <!-- 管理员添加用户 -->
     <el-drawer
       :title="title"
       :visible.sync="isShow"
@@ -228,6 +247,41 @@
       </div>
     </el-drawer>
 
+    <!-- 超级管理员批量添加公司管理员 -->
+    <el-dialog
+      title="批量导入"
+      :visible.sync="dialogVisible"
+      :before-close="handleClosDialog"
+    >
+      <upload-excel-component
+        :on-success="handleSuccess"
+        :before-upload="beforeUpload"
+      />
+      <el-table
+        :data="dialogTableData"
+        border
+        stripe
+        highlight-current-row
+        style="width: 100%; margin-top: 20px"
+      >
+        <el-table-column type="index" width="50"> </el-table-column>
+        <el-table-column prop="username" label="用户名称"> </el-table-column>
+        <el-table-column prop="taxNum" label="纳税识别号"> </el-table-column>
+        <el-table-column prop="companyName" label="公司名称"> </el-table-column>
+        <el-table-column prop="registerLocation" label="注册地址">
+        </el-table-column>
+        <el-table-column prop="phoneNumber" label="联系方式"> </el-table-column>
+        <el-table-column prop="noteInformation" label="备注信息">
+        </el-table-column>
+      </el-table>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogCancel()">取 消</el-button>
+        <el-button type="primary" size="medium" @click="addUserPlus()">
+          保存
+        </el-button>
+      </span>
+    </el-dialog>
+
     <!-- 给用户分配项目权限 -->
     <el-dialog title="授权管理" :visible.sync="dialogFormVisible" width="40%">
       <el-form :rules="ruleValidateAssginProject" ref="editorUserForm">
@@ -265,13 +319,15 @@ import {
   resetUserPWD,
   deleteUser,
   updateAssginProject,
+  multiAddCompanyAdmin
 } from "@/api/user.js";
 import { queryProjectList } from "@/api/projectApi/index.js";
 import { formatDate } from "@/utils/validate";
+import UploadExcelComponent from "@/components/UploadExcel/index.vue";
 
 export default {
   name: "userManage",
-  components: {},
+  components: { UploadExcelComponent },
   created() {},
   mounted() {
     this.getUserList();
@@ -281,6 +337,9 @@ export default {
     return {
       isShow: false,
       loading: false,
+      // 批量导入公司管理员 dialog
+      dialogTableData: [],
+      dialogVisible: false,
       title: "提交",
       type: 1, // 1:添加 2:编辑
       editProjectId: -1,
@@ -384,7 +443,103 @@ export default {
         this.$refs["addUserForm"].resetFields();
       });
     },
-    addUserPlus() {},
+    beforeUpload(file) {
+      const isLt1M = file.size / 1024 / 1024 < 1;
+
+      if (isLt1M) {
+        return true;
+      }
+
+      this.$message({
+        message: "Please do not upload files larger than 1m in size.",
+        type: "warning",
+      });
+      return false;
+    },
+
+    // 对批量上传数据进行校验
+    handleSuccess({ results, header }) {
+      // 对导入的用户名、纳税识别号做校验，不能为空
+      try {
+        // for (let i = 0; i < results.length; i++) {
+        //   let inputYear = parseInt(results[i]["年份"].split("年")[0]);
+        //   if (inputYear < startYear || inputYear > endYear) {
+        //     this.$message.error(
+        //       "导入失败，请检查导入时间是否包含在项目开始时间和结束时间之间！"
+        //     );
+        //     return;
+        //   }
+        // }
+      } catch (error) {
+        this.$message.error("导入失败");
+        return;
+      }
+      this.$message.success("导入成功！");
+      let newData = this.dealData(results);
+      this.dialogTableData = newData;
+    },
+
+    // 数据处理
+    // 数据处理，替换key值
+    dealData(tableData) {
+      let newData = [];
+      try {
+        for (let i = 0; i < tableData.length; i++) {
+          let _item = JSON.parse(
+            JSON.stringify(tableData[i])
+              .replace("用户名称", "username")
+              .replace("纳税识别号", "taxNum")
+              .replace("公司名称", "companyName")
+              .replace("注册地址", "registerLocation")
+              .replace("联系方式", "phoneNumber")
+              .replace("备注信息", "noteInformation")
+          );
+          newData.push(_item);
+        }
+      } catch (error) {
+        this.$message.error("数据导入格式错误" + error);
+      }
+      return newData;
+    },
+
+    // 超级管理员批量新增企业管理员
+    async addUserPlus() {
+      if (this.dialogTableData.length === 0) {
+        this.$message.warning("请导入数据后再添加！");
+        return;
+      }
+      let params = {
+        // userID: this.$store.getters.id,
+        // projectID: this.passData.projectId,
+        tableDate: this.dialogTableData,
+      };
+      let succRes = null;
+      try {
+        succRes = await multiAddCompanyAdmin(params);
+        this.$message.success(succRes.message);
+        this.getUserList()
+      } catch (error) {
+        this.$message.error("批量添加公司管理员失败！", error);
+      }
+      this.dialogVisible = false;
+      this.dialogTableData = [];
+    },
+
+    // 批量新增取消
+    dialogCancel() {
+      this.dialogVisible = false;
+      this.dialogTableData = [];
+    },
+    handleClosDialog(done, cancel) {
+      this.$confirm("确认关闭？")
+        .then((_) => {
+          done();
+          this.dialogTableData = [];
+        })
+        .catch((_) => {
+          this.dialogTableData = [];
+        });
+    },
 
     // 删除
     handleDelete(index, row) {

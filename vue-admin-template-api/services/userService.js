@@ -47,7 +47,7 @@ function login(req, res, next) {
             // 设置过期时间
             { expiresIn: JWT_EXPIRED }
           )
-          
+
           // 将角色权限返回
           let roles = []
           roles.push(user[0].roles)
@@ -231,12 +231,12 @@ function queryUserList(req, res, next) {
     // 抛出错误，交给我们自定义的统一异常处理程序进行错误返回 
     next(boom.badRequest(msg));
   } else {
-    let { pageSize, pageNo, userID="", superAdmin="false" } = req.query;
+    let { pageSize, pageNo, userID = "", superAdmin = "false" } = req.query;
     // 默认值
     pageSize = pageSize ? pageSize : 1;
     pageNo = pageNo ? pageNo : 1;
 
-    if(userID === "" || superAdmin==="true") {
+    if (userID === "" || superAdmin === "true") {
       // userID没有传递值，默认查询所有用户
       // 用户是 superAdmin，那么查询所有的用户
       query = `select u.id, u.username, u.password, u.taxNum, u.companyName, u.registerLocation, u.phoneNumber, u.noteInformation, u.roles, u.superAdmin, u.assginProjectId from sys_user u`;
@@ -383,6 +383,66 @@ function addUser(req, res, next) {
   }
 }
 
+// 超级管理员批量添加公司管理员
+async function multiAddCompanyAdmin(req, res, next) {
+  const err = validationResult(req);
+  if (!err.isEmpty()) {
+    const [{ msg }] = err.errors;
+    next(boom.badRequest(msg));
+  } else {
+    let { tableDate, upperLevelUserId = "-1", superAdmin="false" } = req.body;
+    // ======================此处应该校验纳税识别号是否为一，这里后续完善·
+    // 纳税识别号为唯一
+    // findUserByTaxNum(taxNum)
+    // 用户名为唯一
+    // findUser(taxNum)
+    //   .then(data => {
+    //     if (data) {
+    //       res.json({
+    //         code: CODE_ERROR,
+    //         message: '新增失败，该纳税识别号用户已经存在！',
+    //         data: null
+    //       })
+    //     } else {
+    let password = md5(DEFAULT_PWD);
+    let roles = 'admin'
+
+    let sql = ''
+    let count = 0
+    let succCount = 0
+    let failCount = 0
+    for (let i = 0; i < tableDate.length; i++) {
+      count++
+      sql = `insert into sys_user(username, password, taxNum, companyName, registerLocation, phoneNumber, noteInformation, roles, upperLevelUserId, superAdmin) values('${tableDate[i].username}',  '${password}', '${tableDate[i].taxNum}', '${tableDate[i].companyName}','${tableDate[i].registerLocation}','${tableDate[i].phoneNumber}','${tableDate[i].noteInformation}', '${roles}', '${upperLevelUserId}', '${superAdmin}')`;
+      await querySql(sql)
+        .then(data => {
+          succCount++
+        }).catch(err => {
+          failCount++
+        })
+    }
+
+    if (count !== tableDate.length) {
+      res.json({
+        code: CODE_ERROR,
+        message: `添加数据失败，请求添加${tableDate.length}条数据,成功添加${succCount}条数据，添加失败${failCount}条数据!`,
+        data: null
+      })
+      failCount++
+    } else {
+      res.json({
+        code: CODE_SUCCESS,
+        message: `请求添加${tableDate.length}条数据，成功添加${succCount}条数据，添加失败${failCount}条数据!`,
+        data: null
+      })
+      succCount++
+    }
+    return
+  }
+  //     })
+  // }
+}
+
 // 编辑用户（用户自己进行编辑修改）
 function editUser(req, res, next) {
   const err = validationResult(req);
@@ -391,7 +451,7 @@ function editUser(req, res, next) {
     next(boom.badRequest(msg));
   } else {
     let { userID, username, password, taxNum, companyName, registerLocation, phoneNumber, noteInformation } = req.body;
-    if(noteInformation === null) {
+    if (noteInformation === null) {
       noteInformation = "无"
     }
     let query = ""
@@ -523,4 +583,5 @@ module.exports = {
   resetUserPWD,
   deleteUser,
   updateAssginProject,
+  multiAddCompanyAdmin,
 }
