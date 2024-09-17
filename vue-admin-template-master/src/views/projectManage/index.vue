@@ -8,6 +8,7 @@
           icon="md-add"
           size="medium"
           @click="addProjectView"
+          v-show="this.$store.getters.roles=== 'admin'"
         >
           添加项目
         </el-button>
@@ -30,7 +31,7 @@
             <span style="margin-left: 10px">{{ scope.row.projectNum }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="研发项目名称" >
+        <el-table-column label="研发项目名称">
           <template slot-scope="scope">
             <span style="margin-left: 10px">{{ scope.row.projectName }}</span>
           </template>
@@ -76,7 +77,7 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150">
+        <el-table-column label="操作" width="150" v-if="this.$store.getters.roles=== 'admin'">
           <template slot-scope="scope">
             <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">
               编辑
@@ -171,7 +172,9 @@ import {
   addProject,
   editProject,
   deleteProject,
+  queryAssginProjectList,
 } from "@/api/projectApi/index.js";
+import { getUserRoleInfo } from "@/api/user.js";
 import { formatDate } from "@/utils/validate";
 
 export default {
@@ -233,26 +236,52 @@ export default {
   },
   methods: {
     // 获取全部项目列表
-    getProjectList() {
+    // 这里更改了逻辑，之前是不论谁创建了都可以看得到
+    // 现在需要管理员的授权才能看到项目信息
+    async getProjectList() {
+      // console.log("this.$store.getters.roles================", this.$store.getters.roles)
       this.loading = true;
       let params = {
         userID: this.$store.getters.id,
       };
-      queryProjectList(params)
-        .then((res) => {
-          this.loading = false;
-          if (res.data != null) {
-            this.tableData = res.data.rows;
-            this.total = res.data.total;
-          } else {
-            this.tableData = [];
-            this.total = 0;
-          }
-        })
-        .catch((err) => {
-          this.loading = false;
+      // 在这里判断是企业管理员admin 还是普通用户editor
+      let userRoleInfo = await getUserRoleInfo(params);
+      // 获取每个人员的 assginProjectId 字段
+      // let roles = userRoleInfo.data.rows[0].roles;
+      let assginProjectId = userRoleInfo.data.rows[0].assginProjectId;
+
+      // 如果是管理员，那么全部不需要看权限，可以展示全部项目
+      if (this.$store.getters.roles === "admin") {
+        queryProjectList(params)
+          .then((res) => {
+            this.loading = false;
+            if (res.data != null) {
+              this.tableData = res.data.rows;
+              this.total = res.data.total;
+            } else {
+              this.tableData = [];
+              this.total = 0;
+            }
+          })
+          .catch((err) => {
+            this.loading = false;
+          });
+      } else {
+        // 如果是非管理员，那么需要管理员进行赋权才能看到
+        let res = await queryAssginProjectList({
+          assginProjectId: assginProjectId,
         });
+        if (res.data != null) {
+          this.tableData = res.data.rows;
+          this.total = res.data.total;
+        } else {
+          this.tableData = [];
+          this.total = 0;
+        }
+        this.loading = false;
+      }
     },
+
     handleClose(done) {
       this.$confirm("确认关闭？")
         .then((_) => {

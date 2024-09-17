@@ -54,6 +54,54 @@ function queryProjectList(req, res, next) {
     }
 }
 
+// 查询授权的任务列表
+function queryAssginProjectList(req, res, next) {
+    // console.log('test-req-----------------', req)
+    const err = validationResult(req);
+    // 如果验证错误，empty不为空
+    if (!err.isEmpty()) {
+        // 获取错误信息
+        const [{ msg }] = err.errors;
+        // 抛出错误，交给我们自定义的统一异常处理程序进行错误返回 
+        next(boom.badRequest(msg));
+    } else {
+        let { pageSize, pageNo, assginProjectId = "-1" } = req.query;
+        // assginProjectId: '2, 4'，这里需要拼接成 sql 语句
+        // 默认值
+        pageSize = pageSize ? pageSize : 1;
+        pageNo = pageNo ? pageNo : 1;
+        
+        if(assginProjectId === "") {
+            assginProjectId = "-1"
+        }
+        // console.log("========assginProjectId==", assginProjectId)
+        let query = `select d.projectId, d.projectNum, d.projectName, d.startDate, d.endDate, d.projectLeader from sys_project d where projectId in (${assginProjectId})`;
+        // let query = `select d.projectId, d.projectNum, d.projectName, d.startDate, d.endDate, d.projectLeader from sys_project d where ${userID} = d.projectOwner`;
+        querySql(query)
+            .then(data => {
+                if (!data || data.length === 0) {
+                    res.json({
+                        code: CODE_ERROR,
+                        message: '暂无数据',
+                        data: null
+                    })
+                } else {
+                    res.json({
+                        code: CODE_SUCCESS,
+                        message: '查询数据成功',
+                        data: {
+                            rows: data,
+                            total: data.length,
+                            pageNo: parseInt(pageNo),
+                            pageSize: parseInt(pageSize),
+                        }
+                    })
+                }
+            }).catch(res => {
+            })
+    }
+}
+
 // 添加任务
 function addProject(req, res, next) {
     const err = validationResult(req);
@@ -188,7 +236,8 @@ function findProject(param, type) {
 
 module.exports = {
     queryProjectList,
+    queryAssginProjectList,
     addProject,
     editProject,
-    deleteProject
+    deleteProject,
 }

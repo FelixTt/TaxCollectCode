@@ -76,6 +76,7 @@ export default {
   height: 50px;
   overflow: hidden;
   position: relative;
+  // background: #1a56a8;
   background: #fff;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
 
@@ -110,6 +111,7 @@ export default {
       padding: 0 8px;
       height: 100%;
       font-size: 18px;
+      // color: #1a56a8;
       color: #5a5e66;
       vertical-align: text-bottom;
 

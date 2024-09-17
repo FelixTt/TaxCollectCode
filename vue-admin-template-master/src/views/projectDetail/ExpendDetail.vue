@@ -167,7 +167,7 @@ export default {
         succRes = await addExpendDetailDetail(params)
         newList = await this.getExpendDetail()
         this.$message.success(succRes.message);
-        this.updateStaticsData(newList)
+        // this.updateStaticsData(newList)
       } catch (error) {
         this.$message.error("添加直投-材料表错误！", error);
       }
@@ -225,7 +225,7 @@ export default {
       let newList = await this.getExpendDetail()
 
       // 更新汇总数据
-      this.updateStaticsData(newList)
+      // this.updateStaticsData(newList)
     },
     async updateStaticsData(data) {
       let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()

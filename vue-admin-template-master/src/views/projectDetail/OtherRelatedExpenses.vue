@@ -203,7 +203,7 @@ export default {
         succRes = await addOtherRelatedExpensesDetail(params)
         newList = await this.getOtherRelatedExpenses()
         this.$message.success(succRes.message);
-        this.updateStaticsData(newList, params)
+        // this.updateStaticsData(newList, params)
       } catch (error) {
         this.$message.error("添加其他相关费用表错误！", error);
       }
@@ -361,7 +361,7 @@ export default {
       let newList = await this.getOtherRelatedExpenses()
 
       // 更新汇总数据
-      this.updateStaticsData(newList)
+      // this.updateStaticsData(newList)
     },
     // 格式化展示时间
     showTableTime(time) {

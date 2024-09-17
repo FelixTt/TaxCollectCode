@@ -92,3 +92,19 @@ export function getRouteList(params) {
     params
   })
 }
+
+// export function getRouteList(params) {
+//   return request({
+//     url: `/getRouteList`,
+//     method: "get",
+//     params
+//   })
+// }
+
+export function updateAssginProject(data) {
+  return request({
+    url: `/updateAssginProject`,
+    method: "put",
+    data
+  })
+}

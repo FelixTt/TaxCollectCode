@@ -8,7 +8,7 @@
       label-position="left"
     >
       <div class="title-container">
-        <h3 class="title">研发费用智汇享系统</h3>
+        <h3 class="title">研 发 费 用 智 汇 享 系 统</h3>
       </div>
 
       <el-form-item prop="username">
@@ -179,6 +179,7 @@ $cursor: #fff;
 </style>
 
 <style lang="scss" scoped>
+// $bg: #1a56a8;
 $bg: #2d3a4b;
 $dark_gray: #889aa4;
 $light_gray: #eee;
@@ -222,7 +223,8 @@ $light_gray: #eee;
     position: relative;
 
     .title {
-      font-size: 26px;
+      font-size: 35px;
+      // font-size: 26px;
       color: $light_gray;
       margin: 0px auto 40px auto;
       text-align: center;

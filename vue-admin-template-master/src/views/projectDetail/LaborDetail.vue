@@ -235,7 +235,7 @@ export default {
         succRes = await addProjectLaborDetail(params)
         newList = await this.getLaborDetailList()
         this.$message.success(succRes.message);
-        this.updateStaticsData(newList)
+        // this.updateStaticsData(newList)
       } catch (error) {
         this.$message.error("添加人工表错误！", error);
       }
@@ -348,7 +348,7 @@ export default {
       let newList = await this.getLaborDetailList()
       
       // 更新汇总数据
-      this.updateStaticsData(newList)
+      // this.updateStaticsData(newList)
     },
 
     // 汇总统计更新

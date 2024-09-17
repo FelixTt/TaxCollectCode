@@ -51,7 +51,7 @@ export const constantRoutes = [
       path: 'dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: '首页', icon: 'dashboard' }
+      meta: { title: '首页', icon: 'el-icon-s-home' }
     }]
   },
   {
@@ -61,7 +61,7 @@ export const constantRoutes = [
       path: 'index',
       name: 'ProjectManage',
       component: () => import('@/views/projectManage/index'),
-      meta: { title: '研发项目管理', icon: 'dashboard' }
+      meta: { title: '研发项目管理', icon: 'el-icon-s-management' }
     }]
   },
   {
@@ -88,17 +88,7 @@ export const constantRoutes = [
   //     meta: { title: '辅助帐明细', icon: 'dashboard' }
   //   }]
   // },
-  {
-    path: '/auxiliarySummary',
-    component: Layout,
-    // hidden: true,
-    children: [{
-      path: '/auxiliarySummary',
-      name: 'AuxiliarySummary',
-      component: () => import('@/views/dataDetail/auxiliarySummary.vue'),
-      meta: { title: '辅助汇总表', icon: 'dashboard' }
-    }]
-  },
+  
   {
     path: '/projectDetail',
     component: Layout,
@@ -175,13 +165,24 @@ export const asyncRoutes = [
   //   }]
   // },
   {
+    path: '/auxiliarySummary',
+    component: Layout,
+    // hidden: true,
+    children: [{
+      path: '/auxiliarySummary',
+      name: 'AuxiliarySummary',
+      component: () => import('@/views/dataDetail/auxiliarySummary.vue'),
+      meta: { title: '辅助汇总表', icon: 'el-icon-notebook-1', roles: ['admin'] }
+    }]
+  },
+  {
     path: '/userManage',
     component: Layout,
     children: [{
       path: '/userManage',
       name: 'UserManage',
       component: () => import('@/views/userManage/index'),
-      meta: { title: '用户管理', icon: 'dashboard', roles: ['admin'] }
+      meta: { title: '用户管理', icon: 'el-icon-user', roles: ['admin'] }
     }]
   },
 ]

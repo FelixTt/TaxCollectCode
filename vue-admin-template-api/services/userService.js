@@ -221,7 +221,7 @@ function findUserByTaxNum(taxNum) {
   return queryOne(query);
 }
 
-// 查询所有用户信息
+// 查询所有用户 / 所有下级用户 信息
 function queryUserList(req, res, next) {
   const err = validationResult(req);
   // 如果验证错误，empty不为空
@@ -231,12 +231,18 @@ function queryUserList(req, res, next) {
     // 抛出错误，交给我们自定义的统一异常处理程序进行错误返回 
     next(boom.badRequest(msg));
   } else {
-    let { pageSize, pageNo } = req.query;
+    let { pageSize, pageNo, userID="", superAdmin="false" } = req.query;
     // 默认值
     pageSize = pageSize ? pageSize : 1;
     pageNo = pageNo ? pageNo : 1;
 
-    const query = `select u.id, u.username, u.password, u.taxNum, u.companyName, u.registerLocation, u.phoneNumber, u.noteInformation, u.roles from sys_user u`;
+    if(userID === "" || superAdmin==="true") {
+      // userID没有传递值，默认查询所有用户
+      // 用户是 superAdmin，那么查询所有的用户
+      query = `select u.id, u.username, u.password, u.taxNum, u.companyName, u.registerLocation, u.phoneNumber, u.noteInformation, u.roles, u.superAdmin, u.assginProjectId from sys_user u`;
+    } else {
+      query = `select u.id, u.username, u.password, u.taxNum, u.companyName, u.registerLocation, u.phoneNumber, u.noteInformation, u.roles, u.assginProjectId, u.superAdmin from sys_user u where upperLevelUserId =${userID}`;
+    }
     // let query = `select u.username, u.password, u.taxNum, u.companyName, u.registerLocation, u.phoneNumber, u.noteInformation, u.roles from sys_user u`;
     // let query = `select * from sys_user where id=${userID}`;
     querySql(query)
@@ -279,7 +285,7 @@ function queryUserById(req, res, next) {
     pageSize = pageSize ? pageSize : 1;
     pageNo = pageNo ? pageNo : 1;
 
-    let query = `select u.username, u.taxNum, u.companyName, u.registerLocation, u.phoneNumber, u.noteInformation, u.roles from sys_user u where id=${userID}`;
+    let query = `select u.username, u.taxNum, u.companyName, u.registerLocation, u.phoneNumber, u.noteInformation, u.roles, u.assginProjectId, u.superAdmin from sys_user u where id=${userID}`;
     // let query = `select u.username, u.password, u.taxNum, u.companyName, u.registerLocation, u.phoneNumber, u.noteInformation, u.roles from sys_user u`;
     // let query = `select * from sys_user where id=${userID}`;
     querySql(query)
@@ -314,7 +320,7 @@ function addUser(req, res, next) {
     const [{ msg }] = err.errors;
     next(boom.badRequest(msg));
   } else {
-    let { username, taxNum, companyName } = req.body;
+    let { username, taxNum, companyName, registerLocation, upperLevelUserId } = req.body;
     // 纳税识别号为唯一
     // findUserByTaxNum(taxNum)
     // 用户名为唯一
@@ -323,21 +329,21 @@ function addUser(req, res, next) {
         if (data) {
           res.json({
             code: CODE_ERROR,
-            msg: '该纳税识别号用户已经存在！',
+            message: '新增失败，该纳税识别号用户已经存在！',
             data: null
           })
         } else {
           let password = md5(DEFAULT_PWD);
           let roles = 'editor'
           // password = md5(password);
-          const query = `insert into sys_user(username, password, taxNum, companyName, roles) values('${username}',  '${password}', '${taxNum}', '${companyName}', '${roles}')`;
+          const query = `insert into sys_user(username, password, taxNum, companyName, registerLocation, roles, upperLevelUserId) values('${username}',  '${password}', '${taxNum}', '${companyName}','${registerLocation}', '${roles}', '${upperLevelUserId}')`;
           querySql(query)
             .then(result => {
               console.log('用户注册===', result);
               if (!result || result.length === 0) {
                 res.json({
                   code: CODE_ERROR,
-                  msg: '注册失败',
+                  message: '注册失败',
                   data: null
                 })
               } else {
@@ -362,7 +368,7 @@ function addUser(req, res, next) {
 
                     res.json({
                       code: CODE_SUCCESS,
-                      msg: '注册成功',
+                      message: '注册成功',
                       data: {
                         token,
                         userData
@@ -477,6 +483,35 @@ function deleteUser(req, res, next) {
 }
 
 
+// 管理员分配项目权限接口
+function updateAssginProject(req, res, next) {
+  const err = validationResult(req);
+  if (!err.isEmpty()) {
+    const [{ msg }] = err.errors;
+    next(boom.badRequest(msg));
+  } else {
+    let { userID, projectIDs } = req.body;
+
+    let query = `update sys_user set assginProjectId='${projectIDs}' where id=${userID}`
+    querySql(query)
+      .then(data => {
+        if (!data || data.length === 0) {
+          res.json({
+            code: CODE_ERROR,
+            message: '更新数据失败',
+            data: null
+          })
+        } else {
+          res.json({
+            code: CODE_SUCCESS,
+            message: '更新数据成功',
+            data: null
+          })
+        }
+      })
+  }
+}
+
 module.exports = {
   login,
   register,
@@ -487,4 +522,5 @@ module.exports = {
   editUser,
   resetUserPWD,
   deleteUser,
+  updateAssginProject,
 }

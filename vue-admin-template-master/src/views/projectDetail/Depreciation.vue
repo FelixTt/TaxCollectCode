@@ -211,7 +211,7 @@ export default {
         succRes = await addDepreciationDetail(params)
         newList = await this.getDepreciationList()
         this.$message.success(succRes.message);
-        this.updateStaticsData(newList)
+        // this.updateStaticsData(newList)
       } catch (error) {
         this.$message.error("添加折旧表信息错误！", error);
       }
@@ -302,7 +302,7 @@ export default {
       let newList = await this.getDepreciationList()
 
       // 更新汇总数据
-      this.updateStaticsData(newList)
+      // this.updateStaticsData(newList)
     },
     async updateStaticsData(data) {
       let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()

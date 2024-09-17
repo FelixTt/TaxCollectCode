@@ -7,6 +7,14 @@ export function queryProjectList(params) {
     params
   })
 }
+// 获得授权项目
+export function queryAssginProjectList(params) {
+  return request({
+    url: `/queryAssginProjectList`,
+    method: "get",
+    params
+  })
+}
 
 // 添加项目
 export function addProject(data) {

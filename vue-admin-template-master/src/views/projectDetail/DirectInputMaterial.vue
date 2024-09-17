@@ -209,7 +209,7 @@ export default {
         succRes = await addDirectInputMaterialDetail(params)
         newList = await this.getDirectInputMaterial()
         this.$message.success(succRes.message);
-        this.updateStaticsData(newList)
+        // this.updateStaticsData(newList)
       } catch (error) {
         this.$message.error("添加直投-材料表错误！", error);
       }
@@ -290,7 +290,7 @@ export default {
       let newList = await this.getDirectInputMaterial()
 
       // 更新汇总数据
-      this.updateStaticsData(newList)
+      // this.updateStaticsData(newList)
     },
     updateStaticsData(newList) {
       this.calTotalPrice(newList)

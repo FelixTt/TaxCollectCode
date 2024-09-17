@@ -44,6 +44,8 @@ router.put('/editUser', service.editUser);
 router.put('/resetUserPWD', service.resetUserPWD);
 // 删除用户接口
 router.delete('/deleteUser', service.deleteUser);
+// 管理员分配项目权限接口
+router.put('/updateAssginProject', service.updateAssginProject);
 
 module.exports = router;
 

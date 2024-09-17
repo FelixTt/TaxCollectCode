@@ -86,13 +86,19 @@
             v-model="dialogForm.username"
             autocomplete="off"
             :style="inputWidth"
-          ></el-input>
+          >
+          </el-input>
         </el-form-item>
-        <el-form-item
+        <!-- <el-form-item
           label="纳税识别号"
           :label-width="formLabelWidth"
           style="100px"
           prop="taxNum"
+        > -->
+        <el-form-item
+          label="纳税识别号"
+          :label-width="formLabelWidth"
+          style="100px"
         >
           <el-input
             v-model="dialogForm.taxNum"
@@ -101,26 +107,33 @@
             :disabled="true"
           ></el-input>
         </el-form-item>
-        <el-form-item
+        <!-- <el-form-item
           label="公司名称"
           :label-width="formLabelWidth"
           prop="companyName"
+        > -->
+        <el-form-item
+          label="公司名称"
+          :label-width="formLabelWidth"
         >
           <el-input
             v-model="dialogForm.companyName"
             autocomplete="off"
             :style="inputWidth"
+            :disabled="true"
           ></el-input>
         </el-form-item>
-        <el-form-item
+        <!-- <el-form-item
           label="注册地址"
           :label-width="formLabelWidth"
           prop="registerLocation"
-        >
+        > -->
+        <el-form-item label="注册地址" :label-width="formLabelWidth">
           <el-input
             v-model="dialogForm.registerLocation"
             autocomplete="off"
             :style="inputWidth"
+            :disabled="true"
           ></el-input>
         </el-form-item>
         <el-form-item
@@ -251,7 +264,9 @@ import {
   addProject,
   editProject,
   deleteProject,
+  queryAssginProjectList,
 } from "@/api/projectApi/index.js";
+import { getUserRoleInfo } from "@/api/user.js";
 import { editUser } from "@/api/user";
 import { queryUserById } from "@/api/user";
 import { formatDate } from "@/utils/validate";
@@ -343,25 +358,49 @@ export default {
     },
 
     // 获取全部项目列表
-    getProjectList() {
+    async getProjectList() {
+      //  console.log("this.$store.getters.roles================", this.$store.getters.roles)
       this.loading = true;
       let params = {
         userID: this.$store.getters.id,
+        superAdmin: this.$store.getters.superAdmin,
       };
-      queryProjectList(params)
-        .then((res) => {
-          this.loading = false;
-          if (res.data) {
-            this.tableData = res.data.rows;
-            this.total = res.data.total;
-          } else {
-            this.tableData = [];
-            this.total = 0;
-          }
-        })
-        .catch((err) => {
-          this.loading = false;
+      // 在这里判断是企业管理员admin 还是普通用户editor
+      let userRoleInfo = await getUserRoleInfo(params);
+      // 获取每个人员的 assginProjectId 字段
+      // let roles = userRoleInfo.data.rows[0].roles;
+      let assginProjectId = userRoleInfo.data.rows[0].assginProjectId;
+
+      // 如果是管理员，那么全部不需要看权限，可以展示全部项目
+      if (this.$store.getters.roles === "admin") {
+        queryProjectList(params)
+          .then((res) => {
+            this.loading = false;
+            if (res.data != null) {
+              this.tableData = res.data.rows;
+              this.total = res.data.total;
+            } else {
+              this.tableData = [];
+              this.total = 0;
+            }
+          })
+          .catch((err) => {
+            this.loading = false;
+          });
+      } else {
+        // 如果是非管理员，那么需要管理员进行赋权才能看到
+        let res = await queryAssginProjectList({
+          assginProjectId: assginProjectId,
         });
+        if (res.data != null) {
+          this.tableData = res.data.rows;
+          this.total = res.data.total;
+        } else {
+          this.tableData = [];
+          this.total = 0;
+        }
+        this.loading = false;
+      }
     },
 
     // 打开新增栏页面

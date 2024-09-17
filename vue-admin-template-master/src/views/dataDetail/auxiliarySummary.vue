@@ -135,7 +135,7 @@ export default {
       // 下拉框
       options: [
         { value: "2024年", label: "2024年" },
-        { value: "2025年", label: "2025年" },
+        // { value: "2025年", label: "2025年" },
       ],
       value: "2024年",
       objInform: {},

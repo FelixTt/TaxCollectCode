@@ -194,7 +194,7 @@ export default {
         succRes = await addDirectInputleaseDetail(params)
         newList = await this.getDirectInputlease()
         this.$message.success(succRes.message);
-        this.updateStaticsData(newList)
+        // this.updateStaticsData(newList)
       } catch (error) {
         this.$message.error("添加直投--经营租赁表信息错误！", error);
       }
@@ -328,7 +328,7 @@ export default {
       let newList = await this.getDirectInputlease()
 
       // 更新汇总数据
-      this.updateStaticsData(newList)
+      // this.updateStaticsData(newList)
     },
     // 格式化展示时间
     showTableTime(time) {
