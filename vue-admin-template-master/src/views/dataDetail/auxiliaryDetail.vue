@@ -246,8 +246,8 @@ export default {
       // month, category, proof, abstract, $profileCostEtc, totalSalary, totalDirectInputSum, totalRealMonthlyDepreciation, totalRealMonthlyDepreciation, totalRealMonthlyAmortization, totalOtherRelatedExpensessum, totalDomesticCompCostSum, totalAbroadSum
       // 对this.tableData 数据进行处理
     },
+    
     // 对表格进行操作
-
     showSummariesPosition() {
       // 合计行显示在表头
       let table = document.querySelector(".el-table");
@@ -367,7 +367,9 @@ export default {
       this.tableData.push(...res.data.rows);
     },
     async getAuxOtherRelated(params) {
+      // 其他相关费用里面的四个费用：技术图书资料费、研发成果的检索、知识产权的申请费、差旅费等
       let res = await queryAuxOtherRelatedExpenses(params);
+      // 三项费用：其他福利 + 补充养老 + 补充医疗
       let resOtherThreeCostSumRes = await queryOtherThreeCostSum(params);
       if (res.data !== null) {
         this.tableData.push(...res.data.rows);

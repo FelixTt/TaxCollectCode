@@ -28,7 +28,7 @@ function queryAuxLabSalary(req, res, next) {
 
         // let query = `select * from ExpendDetail where projectId = ${projectID}`;
         // let query = `SELECT proof,  month, SUM(salary) AS totalSalary FROM laborDetail WHERE year = '2025年' GROUP BY  proof, month ORDER BY  proof, month;`;
-        let query = `SELECT year, month, proof, category, abstract,  SUM(salary + fund) AS totalSalary FROM laborDetail WHERE projectId=${projectId} AND year = '${year}'  GROUP BY  month, proof, category, year, abstract ORDER BY  proof;`;
+        let query = `SELECT year, month, proof, category, abstract,  SUM(salary + performance) AS totalSalary FROM laborDetail WHERE projectId=${projectId} AND year = '${year}'  GROUP BY  month, proof, category, year, abstract ORDER BY  proof;`;
         // let query = `SELECT 
         //             proof, 
         //             month, 

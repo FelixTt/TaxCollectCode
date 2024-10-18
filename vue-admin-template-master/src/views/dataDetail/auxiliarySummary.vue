@@ -10,61 +10,110 @@
         >
         </el-option>
       </el-select>
+      <!-- show-summary -->
+      <!-- :summary-method="getSummaries" -->
+        <!-- :span-method="arraySpanMethod" -->
       <el-table
         :data="afterDealArrInform"
         border
+        ref="tableDataSummary"
         stripe
-        show-summary
         highlight-current-row
+        @current-change="handleCurrentChange"
         v-loading="loading"
         :row-style="rowStyle"
         style="width: 100%; margin-top: 20px"
       >
-        <el-table-column type="index" width="50"> </el-table-column>
+        <!-- <el-table-column type="index" width="50"> </el-table-column> -->
         <!-- <el-table-column prop="year" label="年份" width="50"> </el-table-column>
         <el-table-column prop="month" label="月份" > </el-table-column> -->
-        <el-table-column prop="projectNum" label="项目编号" align="center"> </el-table-column>
+        <el-table-column prop="projectNum" label="项目编号" colspan=4 align="center">
+        </el-table-column>
         <el-table-column prop="projectName" label="项目名称"> </el-table-column>
-        <el-table-column prop="proof" label="完成情况"> </el-table-column>
-        <el-table-column prop="abstract" label="支出类型"> </el-table-column>
-        <el-table-column prop="abstract" label="允许加计扣除金额合计"> </el-table-column>
-        
+        <el-table-column label="完成情况">
+          <template slot-scope="scope">
+            {{ getIsFinishInfo(scope.row) }}
+          </template>
+        </el-table-column>
+        <!-- <el-table-column prop="isFinish" label="完成情况">{{}}</el-table-column> -->
+        <el-table-column prop="capitalOrExpense" label="支出类型"></el-table-column>
+        <el-table-column prop="allowDeductTotal" label="允许加计扣除金额合计"></el-table-column>
+
         <el-table-column label="人员人工费用" header-align="center">
-          <el-table-column prop="labSalarySum" :span-method="mergeSpanMethod" label="1" align="center" width="80" line-height="80">
+          <el-table-column
+            prop="labSalarySum"
+            :span-method="mergeSpanMethod"
+            label="1"
+            align="center"
+            width="80"
+            line-height="80"
+          >
           </el-table-column>
         </el-table-column>
         <el-table-column label="直接投入费用" align="center">
-          <el-table-column prop="directInputSum" label="2" align="center"> </el-table-column>
+          <el-table-column prop="directInputSum" label="2" align="center">
+          </el-table-column>
         </el-table-column>
         <el-table-column label="折旧费用" align="center" width="110">
-          <el-table-column prop="depreciationSum" label="3" align="center"> </el-table-column>
+          <el-table-column prop="depreciationSum" label="3" align="center">
+          </el-table-column>
         </el-table-column>
         <el-table-column label="无形资产摊销" align="center" width="110">
-          <el-table-column prop="intangibleAssetsSum" label="4" align="center"> </el-table-column>
+          <el-table-column prop="intangibleAssetsSum" label="4" align="center">
+          </el-table-column>
         </el-table-column>
         <el-table-column label="新产品设计费等" align="center" width="110">
-          <el-table-column prop="abstract" label="5" align="center"> </el-table-column>
+          <el-table-column prop="projectDesignSum" label="5" align="center">
+          </el-table-column>
         </el-table-column>
         <el-table-column label="前五项 小计" align="center" width="110">
-          <el-table-column prop="abstract" label="6" align="center"> </el-table-column>
+          <el-table-column prop="frontFiveItemSum" label="6" align="center">
+          </el-table-column>
         </el-table-column>
 
         <el-table-column label="其他相关费用及限额" align="center">
           <el-table-column label="其他相关费用合计" width="110">
-            <el-table-column prop="otherRelatedSum" label="7.1" align="center"> </el-table-column>
+             <!-- <template slot-scope="scope">{{ scope.row.otherRelatedPartOne + scope.row.otherRelatedPartTwo }}</template> -->
+            <el-table-column prop="otherRelatedSum" label="7.1" align="center">
+            </el-table-column>
           </el-table-column>
           <el-table-column label="经限额调整后的其他相关费用" width="110">
-            <el-table-column prop="otherRelatedSum" label="7.2" align="center"> </el-table-column>
+            <el-table-column prop="afterLimitOtherRelatedCost" label="7.2" align="center">
+            </el-table-column>
           </el-table-column>
         </el-table-column>
         <el-table-column label="委托研发费用及限额" align="center">
-          <el-table-column prop="abstract" label="委托境内机构或个人进行研发活动所发生的费用"> </el-table-column>
-          <el-table-column prop="abstract" label="允许加计扣除的委托境内机构或个人进行研发活动所发生的费用"> </el-table-column>
-          <el-table-column prop="abstract" label="委托境外机构进行研发活动所发生的费用"> </el-table-column>
-          <el-table-column prop="abstract" label="经限额调整后的委托境外机构进行研发活动所发生的费用"> </el-table-column>
+          <el-table-column label="委托境内机构或个人进行研发活动所发生的费用">
+            <el-table-column
+              prop="entrustDevelopDomesticSum"
+              label="8.1"
+              align="center"
+            >
+            </el-table-column>
+          </el-table-column>
+          <el-table-column
+            label="允许加计扣除的委托境内机构或个人进行研发活动所发生的费用"
+          >
+            <el-table-column prop="limitEntrustDevelopDomestic" label="8.2" align="center">
+            </el-table-column>
+          </el-table-column>
+          <el-table-column label="委托境外机构进行研发活动所发生的费用">
+            <el-table-column
+              prop="entrustDevelopAbroadSum"
+              label="8.3"
+              align="center"
+            >
+            </el-table-column>
+          </el-table-column>
+          <el-table-column
+            label="经限额调整后的委托境外机构进行研发活动所发生的费用"
+          >
+            <el-table-column prop="afterLimitEntrustDevelopAbroad" label="8.4" align="center">
+            </el-table-column>
+          </el-table-column>
         </el-table-column>
-
-<!-- 
+        
+        <!-- 
         <el-table-column label="费用明细" align="center">
           <el-table-column prop="profileCostEtc" label="本年累计归集金额">
           </el-table-column>
@@ -134,6 +183,8 @@ export default {
       endYear: null,
       // 下拉框
       options: [
+        { value: "2022年", label: "2022年" },
+        { value: "2023年", label: "2023年" },
         { value: "2024年", label: "2024年" },
         // { value: "2025年", label: "2025年" },
       ],
@@ -167,153 +218,267 @@ export default {
         // console.log("新的值:" + newVal);
         // console.log("旧的值:" + oldVal);
         // console.log("hellow  world");
-        this.getProjectDetailList();
+        console.log("~~~~~~", this.value)
+        this.getAllProject();
+        // this.getProjectDetailList();
         this.tableData = [];
+        this.afterDealArrInform = []
       },
     },
+    // afterDealArrInform: {
+    //   handler(newVal, oldVal) {
+    //     // 计算前五项之和；其他相关费用限额调整；
+    //     this.calTableData();
+    //   },
+    // },
   },
   mounted() {
     this.getAllProject();
   },
   methods: {
     // 将数据转换成对象的形式，已经注释掉的方法
-    dealObjInformDataToObj(projectInfo) {
-      // for (let i = 0; i < this.objInform.length; i++) {
-      //   // 处理后的数据格式为：
-      //   // [{id: [labSalarySum]}]
-      //   let projectId = this.objInform[id];
-      //   let labSalarySum = this.objInform[projectId].labSalary.reduce(function (prev, cur) {
-      //     return cur.totalSalary + prev;
-      //   },0);
-      //   this.objInform[projectId].labSalarySum = labSalarySum
-      //   console.log("labSalarySum:", labSalarySum)
-      //   // let labSalarySum = this.objInform[projectId].labSalary.reduce(function (prev, cur) {
-      //   //   return cur.totalSalary + prev;
-      //   // },0);
-      //   // let labSalarySum = this.objInform[projectId].labSalary.reduce(function (prev, cur) {
-      //   //   return cur.totalSalary + prev;
-      //   // },0);
-      //   // let labSalarySum = this.objInform[projectId].labSalary.reduce(function (prev, cur) {
-      //   //   return cur.totalSalary + prev;
-      //   // },0);
-      // }
-      // console.log("this.objInform", this.objInform)
-      for(let projectId in this.objInform) {
-        // 初始化
-        this.afterDealObjInform[projectId] = {}
-        // 工资
-        if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].labSalary != null) {
-          let labSalarySum = this.objInform[projectId].labSalary.reduce(function (prev, cur) {
-          return cur.totalSalary + prev;
-        },0);
-          this.afterDealObjInform[projectId].labSalarySum = labSalarySum.toFixed(2)
-        }
-        // 直投
-        if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].directInput != null) {
-          let directInputSum = this.objInform[projectId].directInput.reduce(function (prev, cur) {
-            return cur.totalDirectInputSum + prev;
-        },0);
-          this.afterDealObjInform[projectId].directInputSum = directInputSum.toFixed(2)
-        }
-        // 折旧费用
-        if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].depreciation != null) {
-          let depreciationSum = this.objInform[projectId].depreciation.reduce(function (prev, cur) {
-          return cur.totalRealMonthlyDepreciation + prev;
-        },0);
-          this.afterDealObjInform[projectId].depreciationSum = depreciationSum.toFixed(2)
-        }
-        // 无形资产摊销
-        if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].intangibleAssets != null) {
-          let intangibleAssetsSum = this.objInform[projectId].intangibleAssets.reduce(function (prev, cur) {
-          return cur.totalRealMonthlyAmortization + prev;
-        },0);
-          this.afterDealObjInform[projectId].intangibleAssetsSum = intangibleAssetsSum.toFixed(2)
-        }
-        // 新产品设计费等
-        if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].intangibleAssets != null) {
-          let intangibleAssetsSum = this.objInform[projectId].intangibleAssets.reduce(function (prev, cur) {
-          return cur.totalRealMonthlyAmortization + prev;
-        },0);
-          this.afterDealObjInform[projectId].intangibleAssetsSum = intangibleAssetsSum.toFixed(2)
-        }
-        // 其他相关费用
-        if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].otherRelated != null) {
-          let otherRelatedSum = this.objInform[projectId].otherRelated.reduce(function (prev, cur) {
-          return (cur.totalOtherRelatedExpensessum + cur.totalOtherThreeCostSum + prev);
-        },0);
-          this.afterDealObjInform[projectId].otherRelatedSum = otherRelatedSum.toFixed(2)
-        }
-        // 委托研发支出
-        if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].entrustDevelop != null) {
-          let entrustDevelopSum = this.objInform[projectId].entrustDevelop.reduce(function (prev, cur) {
-          return cur.totalDomesticCompCostSum + prev;
-        },0);
-          this.afterDealObjInform[projectId].entrustDevelopSum = entrustDevelopSum.toFixed(2)
-        }
-      }
+    // dealObjInformDataToObj(projectInfo) {
+    //   // for (let i = 0; i < this.objInform.length; i++) {
+    //   //   // 处理后的数据格式为：
+    //   //   // [{id: [labSalarySum]}]
+    //   //   let projectId = this.objInform[id];
+    //   //   let labSalarySum = this.objInform[projectId].labSalary.reduce(function (prev, cur) {
+    //   //     return cur.totalSalary + prev;
+    //   //   },0);
+    //   //   this.objInform[projectId].labSalarySum = labSalarySum
+    //   //   console.log("labSalarySum:", labSalarySum)
+    //   //   // let labSalarySum = this.objInform[projectId].labSalary.reduce(function (prev, cur) {
+    //   //   //   return cur.totalSalary + prev;
+    //   //   // },0);
+    //   //   // let labSalarySum = this.objInform[projectId].labSalary.reduce(function (prev, cur) {
+    //   //   //   return cur.totalSalary + prev;
+    //   //   // },0);
+    //   //   // let labSalarySum = this.objInform[projectId].labSalary.reduce(function (prev, cur) {
+    //   //   //   return cur.totalSalary + prev;
+    //   //   // },0);
+    //   // }
+    //   // console.log("this.objInform", this.objInform)
+    //   for(let projectId in this.objInform) {
+    //     // 初始化
+    //     this.afterDealObjInform[projectId] = {}
+    //     // 工资
+    //     if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].labSalary != null) {
+    //       let labSalarySum = this.objInform[projectId].labSalary.reduce(function (prev, cur) {
+    //       return cur.totalSalary + prev;
+    //     },0);
+    //       this.afterDealObjInform[projectId].labSalarySum = labSalarySum.toFixed(2)
+    //     }
+    //     // 直投
+    //     if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].directInput != null) {
+    //       let directInputSum = this.objInform[projectId].directInput.reduce(function (prev, cur) {
+    //         return cur.totalDirectInputSum + prev;
+    //     },0);
+    //       this.afterDealObjInform[projectId].directInputSum = directInputSum.toFixed(2)
+    //     }
+    //     // 折旧费用
+    //     if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].depreciation != null) {
+    //       let depreciationSum = this.objInform[projectId].depreciation.reduce(function (prev, cur) {
+    //       return cur.totalRealMonthlyDepreciation + prev;
+    //     },0);
+    //       this.afterDealObjInform[projectId].depreciationSum = depreciationSum.toFixed(2)
+    //     }
+    //     // 无形资产摊销
+    //     if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].intangibleAssets != null) {
+    //       let intangibleAssetsSum = this.objInform[projectId].intangibleAssets.reduce(function (prev, cur) {
+    //       return cur.totalRealMonthlyAmortization + prev;
+    //     },0);
+    //       this.afterDealObjInform[projectId].intangibleAssetsSum = intangibleAssetsSum.toFixed(2)
+    //     }
+    //     // 新产品设计费等
+    //     if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].intangibleAssets != null) {
+    //       let intangibleAssetsSum = this.objInform[projectId].intangibleAssets.reduce(function (prev, cur) {
+    //       return cur.totalRealMonthlyAmortization + prev;
+    //     },0);
+    //       this.afterDealObjInform[projectId].intangibleAssetsSum = intangibleAssetsSum.toFixed(2)
+    //     }
+    //     // 其他相关费用
+    //     if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].otherRelated != null) {
+    //       let otherRelatedSum = this.objInform[projectId].otherRelated.reduce(function (prev, cur) {
+    //       return (cur.totalOtherRelatedExpensessum + cur.totalOtherThreeCostSum + prev);
+    //     },0);
+    //       this.afterDealObjInform[projectId].otherRelatedSum = otherRelatedSum.toFixed(2)
+    //     }
+    //     // 委托研发支出
+    //     if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].entrustDevelop != null) {
+    //       let entrustDevelopSum = this.objInform[projectId].entrustDevelop.reduce(function (prev, cur) {
+    //       return cur.totalDomesticCompCostSum + prev;
+    //     },0);
+    //       this.afterDealObjInform[projectId].entrustDevelopSum = entrustDevelopSum.toFixed(2)
+    //     }
+    //   }
 
-      // console.log("afterDealObjInform", this.afterDealObjInform);
-    },
+    //   // console.log("afterDealObjInform", this.afterDealObjInform);
+    // },
+
     // 将数据转换成数组的方法
     dealObjInformDataToArr(projectInfo) {
       // console.log("this.objInform", this.objInform)
-      let projectId = projectInfo.projectId
-        
+      let projectId = projectInfo.projectId;
+
       // 初始化一个临时数组
-      let tmpObj = {}
+      let tmpObj = {};
       // 工资
-      if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].labSalary != null) {
-        let labSalarySum = this.objInform[projectId].labSalary.reduce(function (prev, cur) {
-        return cur.totalSalary + prev;
-      },0);
-        tmpObj.labSalarySum = labSalarySum.toFixed(2)
+      if (
+        this.objInform.hasOwnProperty(projectId) &&
+        this.objInform[projectId].labSalary != null
+      ) {
+        let labSalarySum = this.objInform[projectId].labSalary.reduce(function (
+          prev,
+          cur
+        ) {
+          return cur.totalSalary + prev;
+        },
+        0);
+        tmpObj.labSalarySum = labSalarySum.toFixed(2);
       }
       // 直投
-      if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].directInput != null) {
-        let directInputSum = this.objInform[projectId].directInput.reduce(function (prev, cur) {
-          return cur.totalDirectInputSum + prev;
-      },0);
-        tmpObj.directInputSum = directInputSum.toFixed(2)
+      if (
+        this.objInform.hasOwnProperty(projectId) &&
+        this.objInform[projectId].directInput != null
+      ) {
+        let directInputSum = this.objInform[projectId].directInput.reduce(
+          function (prev, cur) {
+            return cur.totalDirectInputSum + prev;
+          },
+          0
+        );
+        tmpObj.directInputSum = directInputSum.toFixed(2);
       }
+
       // 折旧费用
-      if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].depreciation != null) {
-        let depreciationSum = this.objInform[projectId].depreciation.reduce(function (prev, cur) {
-        return cur.totalRealMonthlyDepreciation + prev;
-      },0);
-        tmpObj.depreciationSum = depreciationSum.toFixed(2)
+      if (
+        this.objInform.hasOwnProperty(projectId) &&
+        this.objInform[projectId].depreciation != null
+      ) {
+        let depreciationSum = this.objInform[projectId].depreciation.reduce(
+          function (prev, cur) {
+            return cur.totalRealMonthlyDepreciation + prev;
+          },
+          0
+        );
+        tmpObj.depreciationSum = depreciationSum.toFixed(2);
       }
+
       // 无形资产摊销
-      if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].intangibleAssets != null) {
-        let intangibleAssetsSum = this.objInform[projectId].intangibleAssets.reduce(function (prev, cur) {
-        return cur.totalRealMonthlyAmortization + prev;
-      },0);
-        tmpObj.intangibleAssetsSum = intangibleAssetsSum.toFixed(2)
+      if (
+        this.objInform.hasOwnProperty(projectId) &&
+        this.objInform[projectId].intangibleAssets != null
+      ) {
+        let intangibleAssetsSum = this.objInform[
+          projectId
+        ].intangibleAssets.reduce(function (prev, cur) {
+          return cur.totalRealMonthlyAmortization + prev;
+        }, 0);
+        tmpObj.intangibleAssetsSum = intangibleAssetsSum.toFixed(2);
       }
+
       // 新产品设计费等
-      if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].intangibleAssets != null) {
-        let intangibleAssetsSum = this.objInform[projectId].intangibleAssets.reduce(function (prev, cur) {
-        return cur.totalRealMonthlyAmortization + prev;
-      },0);
-        tmpObj.intangibleAssetsSum = intangibleAssetsSum.toFixed(2)
+      if (
+        this.objInform.hasOwnProperty(projectId) &&
+        this.objInform[projectId].projectDesign != null
+      ) {
+        let projectDesignSum = this.objInform[projectId].projectDesign.reduce(
+          function (prev, cur) {
+            return cur.totalCostsum + prev;
+          },
+          0
+        );
+        tmpObj.projectDesignSum = projectDesignSum.toFixed(2);
       }
       // 其他相关费用
-      if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].otherRelated != null) {
-        let otherRelatedSum = this.objInform[projectId].otherRelated.reduce(function (prev, cur) {
-        return (cur.totalOtherRelatedExpensessum + cur.totalOtherThreeCostSum + prev);
-      },0);
-        tmpObj.otherRelatedSum = otherRelatedSum.toFixed(2)
+      // 这里有两列数据，暂时只计算了一列数据。剩下一列数据待处理。
+      // 第一列其他相关费用分为两个部分，第一部分：其他相关费用里面的四个费用：技术图书资料费、研发成果的检索、知识产权的申请费、差旅费等；第二部分：三项费用：其他福利 + 补充养老 + 补充医疗
+      // 第一部分
+      if (
+        this.objInform.hasOwnProperty(projectId) &&
+        this.objInform[projectId].otherRelatedPartOne != null
+      ) {
+        let otherRelatedSumOne = this.objInform[projectId].otherRelatedPartOne.reduce(
+          function (prev, cur) {
+            return (
+              cur.totalOtherRelatedExpensessum +
+              // cur.totalOtherThreeCostSum +
+              prev
+            );
+          },
+          0
+        );
+        tmpObj.otherRelatedSumOne = otherRelatedSumOne.toFixed(2);
       }
-      // 委托研发支出
-      if(this.objInform.hasOwnProperty(projectId) && this.objInform[projectId].entrustDevelop != null) {
-        let entrustDevelopSum = this.objInform[projectId].entrustDevelop.reduce(function (prev, cur) {
-        return cur.totalDomesticCompCostSum + prev;
-      },0);
-        tmpObj.entrustDevelopSum = entrustDevelopSum.toFixed(2)
+      // 第二部分
+      if (
+        this.objInform.hasOwnProperty(projectId) &&
+        this.objInform[projectId].otherRelatedPartTwo != null
+      ) {
+        let otherRelatedSumTwo = this.objInform[projectId].otherRelatedPartTwo.reduce(
+          function (prev, cur) {
+            return (
+              // cur.totalOtherRelatedExpensessum +
+              cur.totalOtherThreeCostSum +
+              prev
+            );
+          },
+          0
+        );
+        tmpObj.otherRelatedSumTwo = otherRelatedSumTwo.toFixed(2);
       }
-      Object.assign(projectInfo, tmpObj)
-      this.afterDealArrInform.push(projectInfo)
+      // 将第一部分和第二部分相加，得到最终的其他相关费用
+      tmpObj.otherRelatedSum = (parseFloat(tmpObj.otherRelatedSumOne) || 0) + (parseFloat(tmpObj.otherRelatedSumTwo) || 0)
+      // if (
+      //   this.objInform.hasOwnProperty(projectId) &&
+      //   this.objInform[projectId].otherRelated != null
+      // ) {
+      //   let otherRelatedSum = this.objInform[projectId].otherRelated.reduce(
+      //     function (prev, cur) {
+      //       return (
+      //         cur.totalOtherRelatedExpensessum +
+      //         cur.totalOtherThreeCostSum +
+      //         prev
+      //       );
+      //     },
+      //     0
+      //   );
+      //   tmpObj.otherRelatedSum = otherRelatedSum.toFixed(2);
+      // }
 
-      console.log("afterDealArrInform", this.afterDealArrInform);
+      // 委托研发支出--国内
+      if (
+        this.objInform.hasOwnProperty(projectId) &&
+        this.objInform[projectId].entrustDevelopDomestic != null
+      ) {
+        let entrustDevelopDomesticSum = this.objInform[
+          projectId
+        ].entrustDevelopDomestic.reduce(function (prev, cur) {
+          return cur.totalDomesticCompCostSum + prev;
+        }, 0);
+        tmpObj.entrustDevelopDomesticSum = entrustDevelopDomesticSum.toFixed(2);
+      }
+      
+      // 委托研发支出--国际
+      if (
+        this.objInform.hasOwnProperty(projectId) &&
+        this.objInform[projectId].entrustDevelopAbroad != null
+      ) {
+        let entrustDevelopAbroadSum = this.objInform[
+          projectId
+        ].entrustDevelopAbroad.reduce(function (prev, cur) {
+          return cur.totalAbroadSum + prev;
+        }, 0);
+        tmpObj.entrustDevelopAbroadSum = entrustDevelopAbroadSum.toFixed(2);
+      }
+      Object.assign(projectInfo, tmpObj);
+      this.afterDealArrInform.push(projectInfo);
+      /**
+       * 这里因为会循环多次调用，当 this.afterDealArrInform 长度等于 this.tableData 的长度，说明正在遍历最后一个。这个时候进行处理。
+       */
+      if(this.afterDealArrInform.length === this.tableData.length) {
+        this.calTableData();
+      }
     },
 
     async getAllProject() {
@@ -338,7 +503,426 @@ export default {
         // console.log("this.tableData[i]", this.tableData[i])
         this.getProjectDetailList(this.tableData[i]);
       }
-      // 将汇总后的数据进行处理，得到最后的数据格式
+      console.log("afterDealArrInform", this.afterDealArrInform);
+    },
+
+    // 计算限额调整后的数据
+    calTableData() {
+      console.log("+++++++++++++11111=============")
+      // 前五项小计
+      this.calFrontFiveSum()
+
+      // 7.2 其他相关费用限额
+      this.calOtherRelatedCostLimit()
+
+      // 8.2 委托境内 限额计算
+      this.calEntrustDevelopDomestic()
+      // 8.3 委托境外 限额计算
+      this.calEntrustDevelopAbroad()
+
+      // 允许加计扣除金额合计
+      this.calAllowDeductTotal()
+
+      // 资本化金额 / 费用化金额 小记
+      this.calSummaryCapitalAndExpenseMoney()
+
+      // 处理最后三行的样式
+      this.dealLastThreeDataStyle()
+    },
+    dealLastThreeDataStyle() {
+      // // 假设tableData是原始表格数据
+      // let tableData = this.afterDealArrInform;
+      // let lastThreeRows = tableData.slice(-3);
+      // lastThreeRows.forEach(row => {
+      //     row.mergeFlag = true;
+      // });
+      // // 将处理后的最后三行替换回原数据
+
+    },
+
+    // 前五项之和
+    calFrontFiveSum() {
+      let tableData = this.afterDealArrInform;
+      for (let item of tableData) {
+        let frontFiveItemSum =
+          (parseFloat(item.labSalarySum) || 0) +
+          (parseFloat(item.directInputSum) || 0) +
+          (parseFloat(item.depreciationSum) || 0) +
+          (parseFloat(item.intangibleAssetsSum) || 0) +
+          (parseFloat(item.projectDesignSum) || 0);
+        item["frontFiveItemSum"] = frontFiveItemSum;
+      }
+    },
+
+    // 老板本
+    // calOtherRelatedCostLimit() {
+    //   let tableData = this.afterDealArrInform;
+    //   console.log("tableData", tableData)
+    //   let unfinishCapital = []  // 未完成的资本化
+    //   let finishCapital = []    // 已完成的资本化
+    //   let expense = []          // 费用化
+
+    //   // 首先将数据分为3类，分别是未完成的资本化、已完成的资本化、费用化
+    //   // 将所有的数据放至这三个数组中
+    //   for(let i=0; i<tableData.length; i++) {
+    //     if(tableData[i].capitalOrExpense === '费用化') {
+    //       expense.push(tableData[i])
+    //     } else {
+    //       if(tableData[i].isFinish === 'true') {
+    //         finishCapital.push(tableData[i])
+    //       } else {
+    //         unfinishCapital.push(tableData[i])
+    //       }
+    //     }
+    //   }
+      
+    //   // console.log("未完成的资本化", unfinishCapital)
+    //   // console.log("已完成的资本化", finishCapital)
+    //   // console.log("费用化", expense)
+    //   // 计算 已完成资本化 之和
+
+    //   let finishCapitalFrontFiveSum = finishCapital.reduce(function (prev, cur) {return ( cur.frontFiveItemSum +prev);},0);
+    //   let finishCapitalSum = finishCapital.reduce(function (prev, cur) {return ( cur.otherRelatedSum +prev);},0);
+    //   // 计算 费用化 之和
+    //   let expenseFrontFiveSum = expense.reduce(function (prev, cur) {return ( cur.frontFiveItemSum +prev);},0);
+    //   let expenseSum = expense.reduce(function (prev, cur) {return ( cur.otherRelatedSum +prev);},0);
+    
+    //   // 增强代码健壮性
+    //   typeof finishCapitalFrontFiveSum === 'number' ? finishCapitalFrontFiveSum : 0;
+    //   typeof finishCapitalSum === 'number' ? finishCapitalSum : 0;
+    //   typeof expenseFrontFiveSum === 'number' ? expenseFrontFiveSum : 0;
+    //   typeof expenseSum === 'number' ? expenseSum : 0;
+
+    //   let FrontFiveSum = finishCapitalFrontFiveSum + expenseFrontFiveSum 
+    //   // 计算限额其他相关费用
+    //   let limit = (FrontFiveSum * 0.1 / 0.9) > (finishCapitalSum + expenseSum) ? (finishCapitalSum + expenseSum) : (FrontFiveSum * 0.1 / 0.9)
+    //   let rate = 0
+      
+    //   try {
+    //     if(finishCapitalSum + expenseSum !== 0) {
+    //       rate = limit / (finishCapitalSum + expenseSum)
+    //       console.log("rate=============", rate)
+    //     }
+    //   } catch (error) {
+    //     // 出错
+    //     console.log("errrr---rrrr", error)
+    //   }
+    //   if(tableData.length === this.tableData.length) {
+    //   //   console.log("@@@@@@", tableData.length)
+    //   // }
+    //   // 得到占比比率之后，就可以得到 每一条具体的 经限额调整后的其他相关费用, 字段用 afterLimitOtherRelatedCost 来记录
+    //   for(let i=0; i<finishCapital.length; i++) {
+    //     finishCapital[i].afterLimitOtherRelatedCost = ((finishCapital[i].otherRelatedSum || 0) * rate).toFixed(2)
+    //   }
+    //   for(let i=0; i<expense.length; i++) {
+    //     // 这里会出现 NAN 情况，具体问题待排查
+    //     expense[i].afterLimitOtherRelatedCost = ((expense[i].otherRelatedSum || 0) * rate).toFixed(2)
+    //   }
+    //   // 注意！！！本来要将拆分后的数据重新写回去，因为是深拷贝，所以不需要回写
+    //   // this.afterDealArrInform = tableData
+    //   console.log("this.afterDealArrInform!!!!", this.afterDealArrInform)
+    //   }
+    // },
+
+    // 7.1 其他相关费用限额
+    // 新的逻辑，因为涉及到响应式问题，需要用 $set 方法，所以要在原数组上操作
+    calOtherRelatedCostLimit() {
+      let tableData = this.afterDealArrInform;
+      // console.log("tableData", tableData)
+      let unfinishCapital = new Set()  // 未完成的资本化
+      let finishCapital = new Set()   // 已完成的资本化
+      let expense = new Set()          // 费用化
+
+      // 首先将数据分为3类，分别是未完成的资本化、已完成的资本化、费用化
+      // 将所有的数据放至这三个数组中
+      for(let i=0; i<tableData.length; i++) {
+        if(tableData[i].capitalOrExpense === '费用化') {
+          expense.add(i)
+        } else {
+          if(tableData[i].isFinish === 'true') {
+            finishCapital.add(i)
+          } else {
+            unfinishCapital.add(i)
+          }
+        }
+      }
+
+      let finishCapitalFrontFiveSum = 0
+      let finishCapitalSum = 0
+      let expenseFrontFiveSum = 0
+      let expenseSum = 0
+
+      for(let i=0; i<tableData.length; i++) {
+        if(finishCapital.has(i)) {
+          finishCapitalFrontFiveSum = finishCapitalFrontFiveSum + tableData[i].frontFiveItemSum
+          finishCapitalSum = finishCapitalSum + tableData[i].otherRelatedSum
+        } else if(expense.has(i)) {
+          expenseFrontFiveSum = expenseFrontFiveSum + tableData[i].frontFiveItemSum
+          expenseSum = expenseSum + tableData[i].otherRelatedSum
+        }
+      }
+    
+      // 增强代码健壮性
+      typeof finishCapitalFrontFiveSum === 'number' ? finishCapitalFrontFiveSum : 0;
+      typeof finishCapitalSum === 'number' ? finishCapitalSum : 0;
+      typeof expenseFrontFiveSum === 'number' ? expenseFrontFiveSum : 0;
+      typeof expenseSum === 'number' ? expenseSum : 0;
+
+      let FrontFiveSum = finishCapitalFrontFiveSum + expenseFrontFiveSum 
+      // 计算限额其他相关费用
+      let limit = (FrontFiveSum * 0.1 / 0.9) > (finishCapitalSum + expenseSum) ? (finishCapitalSum + expenseSum) : (FrontFiveSum * 0.1 / 0.9)
+      let rate = 0
+      
+      if(finishCapitalSum + expenseSum !== 0) {
+        rate = limit / (finishCapitalSum + expenseSum)
+      }
+      if(tableData.length === this.tableData.length) {
+        for(let i=0; i<tableData.length; i++) {
+          // 这里是为了把 未完成资本化的数据 不进行参与计算
+          if(finishCapital.has(i) || expense.has(i)) {
+            this.$set(tableData[i], 'afterLimitOtherRelatedCost', ((tableData[i].otherRelatedSum || 0) * rate).toFixed(2))
+          }
+        }
+      }
+      // console.log("this.afterDealArrInform!!!!", this.afterDealArrInform)
+    },
+
+    // 8.2 委托境内限额
+    calEntrustDevelopDomestic() {
+      let tableData = this.afterDealArrInform;
+      // console.log("tableData", tableData)
+      for(let i=0; i<tableData.length; i++) {
+          // 这里是为了把 未完成资本化的数据 不进行参与计算
+          this.$set(tableData[i], 'limitEntrustDevelopDomestic', ((tableData[i].entrustDevelopDomesticSum || 0) * 0.8).toFixed(2))
+          // tableData[i].limitEntrustDevelopDomestic = (tableData[i].entrustDevelopDomesticSum || 0) * 0.8
+        }
+    },
+
+    // 8.4 委托境外限额
+    calEntrustDevelopAbroad() {
+      let tableData = this.afterDealArrInform;
+      // console.log("tableData", tableData)
+      let unfinishCapital = new Set()  // 未完成的资本化
+      let finishCapital = new Set()   // 已完成的资本化
+      let expense = new Set()          // 费用化
+
+      // 首先将数据分为3类，分别是未完成的资本化、已完成的资本化、费用化
+      // 将所有的数据放至这三个数组中
+      for(let i=0; i<tableData.length; i++) {
+        if(tableData[i].capitalOrExpense === '费用化') {
+          expense.add(i)
+        } else {
+          if(tableData[i].isFinish === 'true') {
+            finishCapital.add(i)
+          } else {
+            unfinishCapital.add(i)
+          }
+        }
+      }
+
+      let finishCapitalFrontThreeSum = 0
+      let finishCapitalEntrustDevelopAbroadSum = 0
+      let expenseFrontThreeSum = 0
+      let expenseEntrustDevelopAbroadSum = 0
+
+      /**
+       * 委托境外费用限额
+       * （ 6+7.2+8.2 ）* 2 / 3 与 8.3 * 0.8 相比取小值
+       */
+      for(let i=0; i<tableData.length; i++) {
+        if(finishCapital.has(i)) {
+          finishCapitalFrontThreeSum = finishCapitalFrontThreeSum + parseFloat(tableData[i].frontFiveItemSum || 0) + parseFloat(tableData[i].afterLimitOtherRelatedCost || 0) + parseFloat(tableData[i].limitEntrustDevelopDomestic || 0) 
+          finishCapitalEntrustDevelopAbroadSum = finishCapitalEntrustDevelopAbroadSum + (parseFloat(tableData[i].entrustDevelopAbroadSum) || 0)
+        } else if(expense.has(i)) {
+          expenseFrontThreeSum = expenseFrontThreeSum + parseFloat(tableData[i].frontFiveItemSum || 0) + parseFloat(tableData[i].afterLimitOtherRelatedCost || 0) + parseFloat(tableData[i].limitEntrustDevelopDomestic || 0) 
+          expenseEntrustDevelopAbroadSum = expenseEntrustDevelopAbroadSum + (parseFloat(tableData[i].entrustDevelopAbroadSum) || 0)
+        }
+      }
+    
+      // 增强代码健壮性
+      typeof finishCapitalFrontThreeSum === 'number' ? finishCapitalFrontThreeSum : 0;
+      typeof finishCapitalEntrustDevelopAbroadSum === 'number' ? finishCapitalEntrustDevelopAbroadSum : 0;
+      typeof expenseFrontThreeSum === 'number' ? expenseFrontThreeSum : 0;
+      typeof expenseEntrustDevelopAbroadSum === 'number' ? expenseEntrustDevelopAbroadSum : 0;
+
+      let FrontThreeSum = finishCapitalFrontThreeSum + expenseFrontThreeSum 
+      // 计算限额其他相关费用
+      let limit = (FrontThreeSum * 2 / 3) > ((finishCapitalEntrustDevelopAbroadSum + expenseEntrustDevelopAbroadSum) * 0.8) ? ((finishCapitalEntrustDevelopAbroadSum + expenseEntrustDevelopAbroadSum) * 0.8) : (FrontThreeSum * 2 / 3)
+      let rate = 0
+      
+      if(finishCapitalEntrustDevelopAbroadSum + expenseEntrustDevelopAbroadSum !== 0) {
+        rate = limit / (finishCapitalEntrustDevelopAbroadSum + expenseEntrustDevelopAbroadSum)
+      }
+
+      if(tableData.length === this.tableData.length) {
+        for(let i=0; i<tableData.length; i++) {
+          // 这里是为了把 未完成资本化的数据 不进行参与计算
+          if(finishCapital.has(i) || expense.has(i)) {
+            this.$set(tableData[i], 'afterLimitEntrustDevelopAbroad', (parseFloat(tableData[i].entrustDevelopAbroadSum || 0) * rate).toFixed(2))
+          }
+        }
+      }
+    },
+
+    calAllowDeductTotal() {
+      let tableData = this.afterDealArrInform;
+      let unfinishCapital = new Set()  // 未完成的资本化
+      let finishCapital = new Set()   // 已完成的资本化
+      let expense = new Set()          // 费用化
+
+      for(let i=0; i<tableData.length; i++) {
+        if(tableData[i].capitalOrExpense === '费用化') {
+          expense.add(i)
+        } else {
+          if(tableData[i].isFinish === 'true') {
+            finishCapital.add(i)
+          } else {
+            unfinishCapital.add(i)
+          }
+        }
+      }
+
+      for(let i=0; i<tableData.length; i++) {
+        if(finishCapital.has(i) || expense.has(i)) {
+          this.$set(tableData[i], 'allowDeductTotal', (parseFloat(tableData[i].frontFiveItemSum || 0) + parseFloat(tableData[i].afterLimitOtherRelatedCost || 0) + parseFloat(tableData[i].limitEntrustDevelopDomestic || 0) + parseFloat(tableData[i].afterLimitEntrustDevelopAbroad || 0)).toFixed(2))
+        }
+      }
+    },
+
+    // 资本化金额 / 费用化金额 / 金额合计 小记
+    calSummaryCapitalAndExpenseMoney() {
+      let tableData = this.afterDealArrInform;
+      let unfinishCapital = new Set()  // 未完成的资本化
+      let finishCapital = new Set()   // 已完成的资本化
+      let expense = new Set()          // 费用化
+
+      for(let i=0; i<tableData.length; i++) {
+        if(tableData[i].capitalOrExpense === '费用化') {
+          expense.add(i)
+        } else {
+          if(tableData[i].isFinish === 'true') {
+            finishCapital.add(i)
+          } else {
+            unfinishCapital.add(i)
+          }
+        }
+      }
+
+      // 资本化小记
+      let capitalAllowDeductTotal = 0
+      let capitalLabSalarySum = 0
+      let capitalDirectInputSum = 0
+      let capitalDepreciationSum = 0
+      let capitalIntangibleAssetsSum = 0
+      let capitalProjectDesignSum = 0
+      let capitalFrontFiveItemSum = 0
+      let capitalOtherRelatedSum = 0
+      let capitalAfterLimitOtherRelatedCost = 0
+      let capitalEntrustDevelopDomesticSum = 0
+      let capitalLimitEntrustDevelopDomestic = 0
+      let capitalEntrustDevelopAbroadSum = 0
+      let capitalafterLimitEntrustDevelopAbroad = 0
+      // 费用化小记
+      let expenseAllowDeductTotal = 0
+      let expenseLabSalarySum = 0
+      let expenseDirectInputSum = 0
+      let expenseDepreciationSum = 0
+      let expenseIntangibleAssetsSum = 0
+      let expenseProjectDesignSum = 0
+      let expenseFrontFiveItemSum = 0
+      let expenseOtherRelatedSum = 0
+      let expenseAfterLimitOtherRelatedCost = 0
+      let expenseEntrustDevelopDomesticSum = 0
+      let expenseLimitEntrustDevelopDomestic = 0
+      let expenseEntrustDevelopAbroadSum = 0
+      let expenseAfterLimitEntrustDevelopAbroad = 0
+
+      let summaryCapitalMoney = {"projectNum": "资本化金额小记"}
+      let summaryExpenseMoney = {"projectNum": "费用化金额小记"}
+      let summaryMoney = {"projectNum": "合计金额"}
+      // let summaryCapitalMoney = {"projectName": "资本化金额小记", "projectNum": "资本化金额小记", "isFinish": "资本化金额小记", "capitalOrExpense": "资本化金额小记"}
+      // let summaryExpenseMoney = {"projectName": "费用化金额小记", "projectNum": "费用化金额小记", "isFinish": "费用化金额小记", "capitalOrExpense": "费用化金额小记"}
+      // let summaryMoney = {"projectName": "合计金额", "projectNum": "合计金额", "isFinish": "合计金额", "capitalOrExpense": "合计金额"}
+
+      for(let i=0; i<tableData.length; i++) {
+        if(finishCapital.has(i)) {
+          capitalAllowDeductTotal = capitalAllowDeductTotal + parseFloat(tableData[i].allowDeductTotal || 0)
+          capitalLabSalarySum = capitalLabSalarySum + parseFloat(tableData[i].labSalarySum || 0)
+          capitalDirectInputSum = capitalDirectInputSum + parseFloat(tableData[i].directInputSum || 0)
+          capitalDepreciationSum = capitalDepreciationSum + parseFloat(tableData[i].depreciationSum || 0)
+          capitalProjectDesignSum = capitalProjectDesignSum + parseFloat(tableData[i].projectDesignSum || 0)
+          capitalIntangibleAssetsSum = capitalIntangibleAssetsSum + parseFloat(tableData[i].intangibleAssetsSum || 0)
+          capitalFrontFiveItemSum = capitalFrontFiveItemSum + parseFloat(tableData[i].frontFiveItemSum || 0)
+          capitalOtherRelatedSum = capitalOtherRelatedSum + parseFloat(tableData[i].otherRelatedSum || 0)
+          capitalAfterLimitOtherRelatedCost = capitalAfterLimitOtherRelatedCost + parseFloat(tableData[i].afterLimitOtherRelatedCost || 0)
+          capitalEntrustDevelopDomesticSum = capitalEntrustDevelopDomesticSum + parseFloat(tableData[i].entrustDevelopDomesticSum || 0)
+          capitalLimitEntrustDevelopDomestic = capitalLimitEntrustDevelopDomestic + parseFloat(tableData[i].limitEntrustDevelopDomestic || 0)
+          capitalEntrustDevelopAbroadSum = capitalEntrustDevelopAbroadSum + parseFloat(tableData[i].entrustDevelopAbroadSum || 0)
+          capitalafterLimitEntrustDevelopAbroad = capitalafterLimitEntrustDevelopAbroad + parseFloat(tableData[i].afterLimitEntrustDevelopAbroad || 0)
+        } else if(expense.has(i)) {
+          expenseAllowDeductTotal = expenseAllowDeductTotal + parseFloat(tableData[i].allowDeductTotal || 0)
+          expenseLabSalarySum = expenseLabSalarySum + parseFloat(tableData[i].labSalarySum || 0)
+          expenseDirectInputSum = expenseDirectInputSum + parseFloat(tableData[i].directInputSum || 0)
+          expenseDepreciationSum = expenseDepreciationSum + parseFloat(tableData[i].depreciationSum || 0)
+          expenseProjectDesignSum = expenseProjectDesignSum + parseFloat(tableData[i].projectDesignSum || 0)
+          expenseIntangibleAssetsSum = expenseIntangibleAssetsSum + parseFloat(tableData[i].intangibleAssetsSum || 0)
+          expenseFrontFiveItemSum = expenseFrontFiveItemSum + parseFloat(tableData[i].frontFiveItemSum || 0)
+          expenseOtherRelatedSum = expenseOtherRelatedSum + parseFloat(tableData[i].otherRelatedSum || 0)
+          expenseAfterLimitOtherRelatedCost = expenseAfterLimitOtherRelatedCost + parseFloat(tableData[i].afterLimitOtherRelatedCost || 0)
+          expenseEntrustDevelopDomesticSum = expenseEntrustDevelopDomesticSum + parseFloat(tableData[i].entrustDevelopDomesticSum || 0)
+          expenseLimitEntrustDevelopDomestic = expenseLimitEntrustDevelopDomestic + parseFloat(tableData[i].limitEntrustDevelopDomestic || 0)
+          expenseEntrustDevelopAbroadSum = expenseEntrustDevelopAbroadSum + parseFloat(tableData[i].entrustDevelopAbroadSum || 0)
+          expenseAfterLimitEntrustDevelopAbroad = expenseAfterLimitEntrustDevelopAbroad + parseFloat(tableData[i].afterLimitEntrustDevelopAbroad || 0)
+        }
+      }
+      summaryCapitalMoney['allowDeductTotal'] = capitalAllowDeductTotal.toFixed(2)
+      summaryCapitalMoney['labSalarySum'] = capitalLabSalarySum.toFixed(2)
+      summaryCapitalMoney['directInputSum'] = capitalDirectInputSum.toFixed(2)
+      summaryCapitalMoney['depreciationSum'] = capitalDepreciationSum.toFixed(2)
+      summaryCapitalMoney['projectDesignSum'] = capitalProjectDesignSum.toFixed(2)
+      summaryCapitalMoney['intangibleAssetsSum'] = capitalIntangibleAssetsSum.toFixed(2)
+      summaryCapitalMoney['frontFiveItemSum'] = capitalFrontFiveItemSum.toFixed(2)
+      summaryCapitalMoney['otherRelatedSum'] = capitalOtherRelatedSum.toFixed(2)
+      summaryCapitalMoney['afterLimitOtherRelatedCost'] = capitalAfterLimitOtherRelatedCost.toFixed(2)
+      summaryCapitalMoney['entrustDevelopDomesticSum'] = capitalEntrustDevelopDomesticSum.toFixed(2)
+      summaryCapitalMoney['limitEntrustDevelopDomestic'] = capitalLimitEntrustDevelopDomestic.toFixed(2)
+      summaryCapitalMoney['entrustDevelopAbroadSum'] = capitalEntrustDevelopAbroadSum.toFixed(2)
+      summaryCapitalMoney['afterLimitEntrustDevelopAbroad'] = capitalafterLimitEntrustDevelopAbroad.toFixed(2)
+
+      summaryExpenseMoney['allowDeductTotal'] = expenseAllowDeductTotal.toFixed(2)
+      summaryExpenseMoney['labSalarySum'] = expenseLabSalarySum.toFixed(2)
+      summaryExpenseMoney['directInputSum'] = expenseDirectInputSum.toFixed(2)
+      summaryExpenseMoney['depreciationSum'] = expenseDepreciationSum.toFixed(2)
+      summaryExpenseMoney['projectDesignSum'] = expenseProjectDesignSum.toFixed(2)
+      summaryExpenseMoney['intangibleAssetsSum'] = expenseIntangibleAssetsSum.toFixed(2)
+      summaryExpenseMoney['frontFiveItemSum'] = expenseFrontFiveItemSum.toFixed(2)
+      summaryExpenseMoney['otherRelatedSum'] = expenseOtherRelatedSum.toFixed(2)
+      summaryExpenseMoney['afterLimitOtherRelatedCost'] = expenseAfterLimitOtherRelatedCost.toFixed(2)
+      summaryExpenseMoney['entrustDevelopDomesticSum'] = expenseEntrustDevelopDomesticSum.toFixed(2)
+      summaryExpenseMoney['limitEntrustDevelopDomestic'] = expenseLimitEntrustDevelopDomestic.toFixed(2)
+      summaryExpenseMoney['entrustDevelopAbroadSum'] = expenseEntrustDevelopAbroadSum.toFixed(2)
+      summaryExpenseMoney['afterLimitEntrustDevelopAbroad'] = expenseAfterLimitEntrustDevelopAbroad.toFixed(2)
+
+      summaryMoney['allowDeductTotal'] = (parseFloat(summaryCapitalMoney['allowDeductTotal']) + parseFloat(summaryExpenseMoney['allowDeductTotal'])).toFixed(2)
+      summaryMoney['labSalarySum'] = (parseFloat(summaryCapitalMoney['labSalarySum']) + parseFloat(summaryExpenseMoney['labSalarySum'])).toFixed(2)
+      summaryMoney['directInputSum'] = (parseFloat(summaryCapitalMoney['directInputSum']) + parseFloat(summaryExpenseMoney['directInputSum'])).toFixed(2)
+      summaryMoney['depreciationSum'] = (parseFloat(summaryCapitalMoney['depreciationSum']) + parseFloat(summaryExpenseMoney['depreciationSum'])).toFixed(2)
+      summaryMoney['projectDesignSum'] = (parseFloat(summaryCapitalMoney['projectDesignSum']) + parseFloat(summaryExpenseMoney['projectDesignSum'])).toFixed(2)
+      summaryMoney['intangibleAssetsSum'] = (parseFloat(summaryCapitalMoney['intangibleAssetsSum']) + parseFloat(summaryExpenseMoney['intangibleAssetsSum'])).toFixed(2)
+      summaryMoney['frontFiveItemSum'] = (parseFloat(summaryCapitalMoney['frontFiveItemSum']) + parseFloat(summaryExpenseMoney['frontFiveItemSum'])).toFixed(2)
+      summaryMoney['otherRelatedSum'] = (parseFloat(summaryCapitalMoney['otherRelatedSum']) + parseFloat(summaryExpenseMoney['otherRelatedSum'])).toFixed(2)
+      summaryMoney['afterLimitOtherRelatedCost'] = (parseFloat(summaryCapitalMoney['afterLimitOtherRelatedCost']) + parseFloat(summaryExpenseMoney['afterLimitOtherRelatedCost'])).toFixed(2)
+      summaryMoney['entrustDevelopDomesticSum'] = (parseFloat(summaryCapitalMoney['entrustDevelopDomesticSum']) + parseFloat(summaryExpenseMoney['entrustDevelopDomesticSum'])).toFixed(2)
+      summaryMoney['limitEntrustDevelopDomestic'] = (parseFloat(summaryCapitalMoney['limitEntrustDevelopDomestic']) + parseFloat(summaryExpenseMoney['limitEntrustDevelopDomestic'])).toFixed(2)
+      summaryMoney['entrustDevelopAbroadSum'] = (parseFloat(summaryCapitalMoney['entrustDevelopAbroadSum']) + parseFloat(summaryExpenseMoney['entrustDevelopAbroadSum'])).toFixed(2)
+      summaryMoney['afterLimitEntrustDevelopAbroad'] = (parseFloat(summaryCapitalMoney['afterLimitEntrustDevelopAbroad']) + parseFloat(summaryExpenseMoney['afterLimitEntrustDevelopAbroad'])).toFixed(2)
+
+      tableData.push(summaryCapitalMoney)
+      tableData.push(summaryExpenseMoney)
+      tableData.push(summaryMoney)
+      console.log(tableData)
+
+
     },
 
     getProjectDetailList(projectInfo) {
@@ -348,12 +932,14 @@ export default {
       //   new Array(7).fill(0)
       // );
       // let year = this.value;
-      let { projectId } = projectInfo
-      let year = "2024年";
+      let { projectId } = projectInfo;
+      // let year = "2023年";
+      let year = this.value;
       let params = {
         projectId,
         year,
       };
+      // console.log("this.value". this.value)
 
       // let infoArr = []
       Promise.all([
@@ -494,20 +1080,21 @@ export default {
       this.objInform[params.projectId].projectDesign = res.data.rows;
       // this.objInform[params.projectId].push({ projectDesign: res.data.rows });
     },
+    // 其他相关费用由两部分组成：其他相关费用表中的四项 + 人工表三项（福利、补充医疗、补充养老）
     async getAuxOtherRelated(params, index) {
       let res = await queryAuxOtherRelatedExpenses(params);
-      let resOtherThreeCostSumRes = await queryOtherThreeCostSum(params);
       if (res.data !== null) {
-        this.objInform[params.projectId].otherRelated = res.data.rows;
+        this.objInform[params.projectId].otherRelatedPartOne = res.data.rows;
         // this.objInform[params.projectId].push({ otherRelated: res.data.rows });
       }
+
+      let resOtherThreeCostSumRes = await queryOtherThreeCostSum(params);
       if (resOtherThreeCostSumRes.data !== null) {
         let resData = resOtherThreeCostSumRes.data.rows;
-        for (let item of resData) {
-          item.totalOtherRelatedExpensessum = item.totalOtherThreeCostSum;
-        }
-        this.objInform[params.projectId].otherRelated =
-          resOtherThreeCostSumRes.data.rows;
+        // for (let item of resData) {
+        //   item.totalOtherRelatedExpensessum = item.totalOtherThreeCostSum;
+        // }
+        this.objInform[params.projectId].otherRelatedPartTwo = resOtherThreeCostSumRes.data.rows;
         // this.objInform[params.projectId].push({
         //   otherRelated: resOtherThreeCostSumRes.data.rows,
         // });
@@ -523,7 +1110,9 @@ export default {
             abroadDataArr.splice(i, 1);
           }
         }
-        this.objInform[params.projectId].entrustDevelop = abroadRes.data.rows;
+        // this.objInform[params.projectId].entrustDevelop = abroadRes.data.rows;
+        this.objInform[params.projectId].entrustDevelopAbroad =
+          abroadRes.data.rows;
         // this.objInform[params.projectId].push({
         //   entrustDevelop: abroadRes.data.rows,
         // });
@@ -538,13 +1127,31 @@ export default {
             domesticDataArr.splice(i, 1);
           }
         }
-        this.objInform[params.projectId].entrustDevelop = domesticRes.data.rows;
+        // this.objInform[params.projectId].entrustDevelop = domesticRes.data.rows;
+        this.objInform[params.projectId].entrustDevelopDomestic =
+          domesticRes.data.rows;
         // this.objInform[params.projectId].push({
         //   entrustDevelop: domesticRes.data.rows,
         // });
       }
+      // console.log("this.objInform", this.objInform)
     },
 
+    // 获取项目是否完成信息
+    getIsFinishInfo(row) {
+      if(row.isFinish === "true" || row.isFinish === "false") {
+        return row.isFinish === "true" ? "已完成" : "未完成" 
+      } else {
+        return row.isFinish
+      }
+    },
+
+    handleCurrentChange (currentRow, oldCurrentRow) {
+      // this.$refs.tableDataSummary.setCurrentRow(this.afterDealArrInform[this.afterDealArrInform.length-3])
+      // this.$refs.tableDataSummary.setCurrentRow(this.afterDealArrInform[this.afterDealArrInform.length-2])
+      // this.$refs.tableDataSummary.setCurrentRow(this.afterDealArrInform[this.afterDealArrInform.length-1])
+    },
+   
     // 格式化展示时间
     handleCommand(command) {
       let clickItem = "";
@@ -566,23 +1173,24 @@ export default {
         if (rowIndex % 2 === 1) {
           return {
             rowspan: 2,
-            colspan: 2
+            colspan: 2,
           };
         } else {
           return {
             rowspan: 2,
-            colspan: 2
+            colspan: 2,
           };
         }
       }
     },
     rowStyle({ row, rowIndex }) {
-      if (rowIndex === 1) { // 假设我们想要设置第二行的行高
-        return 'height: 100px;';
+      if (rowIndex === 1) {
+        // 假设我们想要设置第二行的行高
+        return "height: 100px;";
       } else {
-        return '';
+        return "";
       }
-    }
+    },
   },
 };
 </script>
@@ -595,5 +1203,8 @@ export default {
 .el-table .el-table__row {
   height: 50px;
   line-height: 50px; /* 确保内容垂直居中 */
+}
+.current-row {
+ background-color: pink;
 }
 </style>

@@ -77,7 +77,11 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" v-if="this.$store.getters.roles=== 'admin'">
+        <el-table-column
+          label="操作"
+          width="150"
+          v-if="this.$store.getters.roles === 'admin'"
+        >
           <template slot-scope="scope">
             <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">
               编辑
@@ -140,6 +144,15 @@
             v-model="formValidate.endDate"
             style="width: 100%"
           ></el-date-picker>
+        </el-form-item>
+        <el-form-item label="是否完成">
+          <el-switch v-model="formValidate.isFinish"></el-switch>
+        </el-form-item>
+        <el-form-item label="支出类型">
+          <el-radio-group v-model="formValidate.capitalOrExpense">
+            <el-radio label="费用化"></el-radio>
+            <el-radio label="资本化"></el-radio>
+          </el-radio-group>
         </el-form-item>
       </el-form>
 
@@ -204,7 +217,13 @@ export default {
         startDate: "",
         endDate: "",
         projectLeader: "",
+        // 作为展示的参数，需要转化为下面两个实际参数。
+        isFinish: false,
+        capitalOrExpense: "费用化",
       },
+      // 实际传递的参数
+      // isFinishParam: "false",
+      // capitalOrExpenseParam: "",
       ruleValidate: {
         projectNum: [
           { required: true, message: "任务名称不能为空", trigger: "blur" },
@@ -319,6 +338,10 @@ export default {
           projectLeader: row.projectLeader,
           startDate: new Date(formatDate(row.startDate)),
           endDate: new Date(formatDate(row.endDate)),
+          // 数据库中存储的是字符串，在回显时要注意转换为 bool 类型。
+          isFinish: row.isFinish === "true" ? true : false,
+          capitalOrExpense: row.capitalOrExpense,
+          // capitalOrExpense: row.capitalOrExpense === "expense" ? "费用化" : "资本化",
         };
       });
     },
@@ -375,6 +398,16 @@ export default {
         if (valid) {
           if (this.type == 1) {
             // 添加
+            // if(this.formValidate.capitalOrExpense === '资本化') {
+            //   this.capitalOrExpenseParam = "capital"
+            // } else {
+            //   this.capitalOrExpenseParam = "expense"
+            // }
+            if(this.formValidate.isFinish === 'true') {
+              this.isFinish = true
+            } else {
+              this.isFinish = false
+            }
             let data = {
               projectNum: this.formValidate.projectNum,
               projectName: this.formValidate.projectName,
@@ -384,6 +417,10 @@ export default {
               ).getTime(),
               endDate: new Date(this.formValidate.endDate.toString()).getTime(),
               userID: this.$store.getters.id,
+              isFinish: this.formValidate.isFinish,
+              capitalOrExpense: this.formValidate.capitalOrExpense,
+              // isFinish: this.isFinishParam,
+              // capitalOrExpense: this.capitalOrExpenseParam,
             };
 
             addProject(data)
@@ -402,6 +439,16 @@ export default {
               });
           } else if (this.type == 2) {
             // 修改
+            // if(this.formValidate.capitalOrExpense === '资本化') {
+            //   this.capitalOrExpenseParam = "capital"
+            // } else {
+            //   this.capitalOrExpenseParam = "expense"
+            // }
+            if(this.formValidate.isFinish === 'true') {
+              this.isFinish = true
+            } else {
+              this.isFinish = false
+            }
             let data = {
               projectId: this.editProjectId,
               projectNum: this.formValidate.projectNum,
@@ -411,6 +458,10 @@ export default {
                 this.formValidate.startDate.toString()
               ).getTime(),
               endDate: new Date(this.formValidate.endDate.toString()).getTime(),
+              isFinish: this.formValidate.isFinish,
+              capitalOrExpense: this.formValidate.capitalOrExpense,
+              // isFinish: this.isFinishParam,
+              // capitalOrExpense: this.capitalOrExpenseParam,
             };
             editProject(data)
               .then((res) => {

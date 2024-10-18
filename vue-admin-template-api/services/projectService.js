@@ -28,7 +28,7 @@ function queryProjectList(req, res, next) {
         pageNo = pageNo ? pageNo : 1;
 
 
-        let query = `select d.projectId, d.projectNum, d.projectName, d.startDate, d.endDate, d.projectLeader from sys_project d where ${userID} = d.projectOwner`;
+        let query = `select d.projectId, d.projectNum, d.projectName, d.startDate, d.endDate, d.projectLeader, d.isFinish, d.capitalOrExpense from sys_project d where ${userID} = d.projectOwner`;
         querySql(query)
             .then(data => {
                 if (!data || data.length === 0) {
@@ -109,7 +109,7 @@ function addProject(req, res, next) {
         const [{ msg }] = err.errors;
         next(boom.badRequest(msg));
     } else {
-        let { projectNum, projectName, projectLeader, startDate, endDate, userID } = req.body;
+        let { projectNum, projectName, projectLeader, startDate, endDate, userID, isFinish, capitalOrExpense } = req.body;
         findProject(projectNum, 1)
             .then(task => {
                 if (task) {
@@ -119,7 +119,7 @@ function addProject(req, res, next) {
                         data: null
                     })
                 } else {
-                    const query = `insert into sys_project(projectNum, projectName, projectLeader, startDate, endDate, projectOwner) values('${projectNum}', '${projectName}', '${projectLeader}','${startDate}','${endDate}','${userID}')`;
+                    const query = `insert into sys_project(projectNum, projectName, projectLeader, startDate, endDate, projectOwner, isFinish, capitalOrExpense ) values('${projectNum}', '${projectName}', '${projectLeader}','${startDate}','${endDate}','${userID}','${isFinish}','${capitalOrExpense}')`;
                     console.log("sql", query)
                     querySql(query)
                         .then(data => {
@@ -150,11 +150,11 @@ function editProject(req, res, next) {
         const [{ msg }] = err.errors;
         next(boom.badRequest(msg));
     } else {
-        let { projectId, projectNum, projectName, projectLeader, startDate, endDate } = req.body;
+        let { projectId, projectNum, projectName, projectLeader, startDate, endDate, isFinish, capitalOrExpense } = req.body;
         findProject(projectId, 2)
             .then(result => {
                 if (result) {
-                    const query = `update sys_project set projectNum='${projectNum}', projectName='${projectName}', projectLeader='${projectLeader}', startDate='${startDate}', endDate='${endDate}' where projectId='${projectId}'`;
+                    const query = `update sys_project set projectNum='${projectNum}', projectName='${projectName}', projectLeader='${projectLeader}', startDate='${startDate}', endDate='${endDate}', isFinish='${isFinish}', capitalOrExpense='${capitalOrExpense}' where projectId='${projectId}'`;
                     querySql(query)
                         .then(data => {
                             if (!data || data.length === 0) {
