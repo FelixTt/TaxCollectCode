@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <div class="btn-region" style="display: flex； justify-content:flex-end">
+    <div class="btn-region" style="display: flex; justify-content:flex-start">
       <el-button type="primary" size="medium" @click="dialogVisible = true">
         批量导入
       </el-button>

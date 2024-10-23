@@ -193,7 +193,10 @@ export default {
       // 对输入的数据进行计算占比，得到 自有设备研发折旧额（元）
       let ocpTmpArr = this.dialogTableData
       for(let i=0; i<ocpTmpArr.length; i++) {
-        let rate = parseFloat(ocpTmpArr[i].developTime) / parseFloat(ocpTmpArr[i].workTime)
+        let rate = 0
+        if(parseFloat(ocpTmpArr[i].workTime) != NaN && parseFloat(ocpTmpArr[i].workTime) != 0) {
+          rate = parseFloat(ocpTmpArr[i].developTime) / parseFloat(ocpTmpArr[i].workTime)
+        }
         let realMonthlyDepreciation = ocpTmpArr[i].MonthlyDepreciation * rate
         ocpTmpArr[i].rate = rate
         ocpTmpArr[i].realMonthlyDepreciation = realMonthlyDepreciation.toFixed(2)

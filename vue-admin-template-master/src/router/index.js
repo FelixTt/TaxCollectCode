@@ -76,6 +76,42 @@ export const constantRoutes = [
       meta: { title: '辅助帐明细', icon: 'dashboard' }
     }]
   },
+  {
+    path: '/pageDownLoad',
+    component: Layout,
+    redirect: '/pageDownLoad',
+    children: [{
+      path: '/pageDownLoad',
+      name: 'PageDownLoad',
+      component: () => import('@/views/dataDetail/pageDownLoad'),
+      hidden: true,
+      meta: { title: '7012表下载', icon: 'dashboard' }
+    }]
+  },
+  {
+    path: '/getInfoAndDownLoadPage',
+    component: Layout,
+    redirect: '/getInfoAndDownLoadPage',
+    children: [{
+      path: '/getInfoAndDownLoadPage',
+      name: 'GetInfoAndDownLoadPage',
+      component: () => import('@/views/dataDetail/getInfoAndDownLoadPage'),
+      hidden: true,
+      meta: { title: '导出7012表信息', icon: 'dashboard' }
+    }]
+  },
+  {
+    path: '/test',
+    component: Layout,
+    redirect: '/test',
+    children: [{
+      path: '/test',
+      name: 'Test',
+      component: () => import('@/views/dataDetail/test.vue'),
+      hidden: true,
+      meta: { title: '测试页面', icon: 'dashboard' }
+    }]
+  },
   // {
   //   path: '/dataDetail',
   //   component: Layout,

@@ -14,4 +14,13 @@ router.get('/queryAuxProjectDesign', service.queryAuxProjectDesign);
 router.get('/queryAuxOtherRelatedExpenses', service.queryAuxOtherRelatedExpenses);
 router.get('/queryOtherThreeCostSum', service.queryOtherThreeCostSum);
 router.get('/queryAuxEntrustDevelop', service.queryAuxEntrustDevelop);
+
+// 研发支出和扣减金额
+router.get('/getDevelopCost', service.getDevelopCost);
+router.get('/getDeductMoney', service.getDeductMoney);
+// router.get('/getDevelopCostAndDeductMoney', service.getDevelopCostAndDeductMoney);
+
+// 获取7012表文件
+router.get('/get7012File', service.get7012File);
+
 module.exports = router;

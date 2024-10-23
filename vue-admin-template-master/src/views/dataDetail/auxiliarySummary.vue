@@ -10,6 +10,16 @@
         >
         </el-option>
       </el-select>
+      <span style="padding-right:10px;"></span>
+      <!-- 这个链接显示直接生成7012表，非官方表格样式 -->
+      <el-button type="primary" @click="create7012Table">生成7012表</el-button>
+
+      <!-- 这个链接包含了两个功能，一个是先手动上传，再下载，另一个是直接下载（未完成。） -->
+      <el-button type="primary" @click="goToDownLoadPage">生成7012表</el-button>
+
+      <!-- 这个页面链接，是为了测试vue.config.js的打包功能。目前暂未成功， -->
+      <!-- <el-button type="primary" @click="goToTestPage" style="display:none">测试页面</el-button> -->
+
       <!-- show-summary -->
       <!-- :summary-method="getSummaries" -->
         <!-- :span-method="arraySpanMethod" -->
@@ -169,6 +179,8 @@ import {
   queryAuxDirectInputFuel,
   queryAuxDirectInputlease,
   queryAuxDirectInputOtherRate,
+  getDevelopCost,
+  getDeductMoney,
 } from "@/api/getAuxProjectDetail";
 
 export default {
@@ -218,7 +230,6 @@ export default {
         // console.log("新的值:" + newVal);
         // console.log("旧的值:" + oldVal);
         // console.log("hellow  world");
-        console.log("~~~~~~", this.value)
         this.getAllProject();
         // this.getProjectDetailList();
         this.tableData = [];
@@ -317,7 +328,7 @@ export default {
 
     // 将数据转换成数组的方法
     dealObjInformDataToArr(projectInfo) {
-      // console.log("this.objInform", this.objInform)
+      // console.log("数据【查询后直接挂载到对象上的】【未经过叠加的】初始值----------", this.objInform)
       let projectId = projectInfo.projectId;
 
       // 初始化一个临时数组
@@ -471,6 +482,33 @@ export default {
         }, 0);
         tmpObj.entrustDevelopAbroadSum = entrustDevelopAbroadSum.toFixed(2);
       }
+
+      // 每个项目的 研发支出 和 扣减金额
+      if (
+        this.objInform.hasOwnProperty(projectId) &&
+        this.objInform[projectId].developCost != null
+      ) {
+        let developCostSum = this.objInform[projectId].developCost.reduce(
+          function (prev, cur) {
+            return cur.totalSpecialIncomeSum + prev;
+          },
+          0
+        );
+        tmpObj.developCostSum = developCostSum.toFixed(2);
+      }
+      if (
+        this.objInform.hasOwnProperty(projectId) &&
+        this.objInform[projectId].deductMoney != null
+      ) {
+        let deductMoneySum = this.objInform[projectId].deductMoney.reduce(
+          function (prev, cur) {
+            return cur.totalMaterialCostSum + prev;
+          },
+          0
+        );
+        tmpObj.deductMoneySum = deductMoneySum.toFixed(2);
+      }
+
       Object.assign(projectInfo, tmpObj);
       this.afterDealArrInform.push(projectInfo);
       /**
@@ -503,12 +541,11 @@ export default {
         // console.log("this.tableData[i]", this.tableData[i])
         this.getProjectDetailList(this.tableData[i]);
       }
-      console.log("afterDealArrInform", this.afterDealArrInform);
+      // console.log("afterDealArrInform", this.afterDealArrInform);
     },
 
     // 计算限额调整后的数据
     calTableData() {
-      console.log("+++++++++++++11111=============")
       // 前五项小计
       this.calFrontFiveSum()
 
@@ -528,6 +565,12 @@ export default {
 
       // 处理最后三行的样式
       this.dealLastThreeDataStyle()
+
+      // 计算所有项目的研发费用和扣减金额
+      this.calTotalProjectDevelopCostSum()
+      this.calTotalProjectDeductMoneySum()
+
+      // console.log("数据处理完成后=--------==----",this.afterDealArrInform)
     },
     dealLastThreeDataStyle() {
       // // 假设tableData是原始表格数据
@@ -550,7 +593,7 @@ export default {
           (parseFloat(item.depreciationSum) || 0) +
           (parseFloat(item.intangibleAssetsSum) || 0) +
           (parseFloat(item.projectDesignSum) || 0);
-        item["frontFiveItemSum"] = frontFiveItemSum;
+        item["frontFiveItemSum"] = frontFiveItemSum.toFixed(2);
       }
     },
 
@@ -628,7 +671,7 @@ export default {
     // 新的逻辑，因为涉及到响应式问题，需要用 $set 方法，所以要在原数组上操作
     calOtherRelatedCostLimit() {
       let tableData = this.afterDealArrInform;
-      // console.log("tableData", tableData)
+      console.log("tableData", tableData)
       let unfinishCapital = new Set()  // 未完成的资本化
       let finishCapital = new Set()   // 已完成的资本化
       let expense = new Set()          // 费用化
@@ -654,11 +697,11 @@ export default {
 
       for(let i=0; i<tableData.length; i++) {
         if(finishCapital.has(i)) {
-          finishCapitalFrontFiveSum = finishCapitalFrontFiveSum + tableData[i].frontFiveItemSum
-          finishCapitalSum = finishCapitalSum + tableData[i].otherRelatedSum
+          finishCapitalFrontFiveSum = finishCapitalFrontFiveSum + parseFloat(tableData[i].frontFiveItemSum)
+          finishCapitalSum = finishCapitalSum + parseFloat(tableData[i].otherRelatedSum)
         } else if(expense.has(i)) {
-          expenseFrontFiveSum = expenseFrontFiveSum + tableData[i].frontFiveItemSum
-          expenseSum = expenseSum + tableData[i].otherRelatedSum
+          expenseFrontFiveSum = expenseFrontFiveSum + parseFloat(tableData[i].frontFiveItemSum)
+          expenseSum = expenseSum + parseFloat(tableData[i].otherRelatedSum)
         }
       }
     
@@ -668,6 +711,7 @@ export default {
       typeof expenseFrontFiveSum === 'number' ? expenseFrontFiveSum : 0;
       typeof expenseSum === 'number' ? expenseSum : 0;
 
+     
       let FrontFiveSum = finishCapitalFrontFiveSum + expenseFrontFiveSum 
       // 计算限额其他相关费用
       let limit = (FrontFiveSum * 0.1 / 0.9) > (finishCapitalSum + expenseSum) ? (finishCapitalSum + expenseSum) : (FrontFiveSum * 0.1 / 0.9)
@@ -919,10 +963,29 @@ export default {
 
       tableData.push(summaryCapitalMoney)
       tableData.push(summaryExpenseMoney)
+
+      this.summaryCapitalMoney = summaryCapitalMoney
+      this.summaryExpenseMoney = summaryExpenseMoney
+      this.summaryMoney = summaryMoney
+
       tableData.push(summaryMoney)
-      console.log(tableData)
+      // console.log(tableData)
 
+    },
 
+    calTotalProjectDevelopCostSum() {
+      let afterCalTotalDevelopCostSum = 0
+      for(let i=0; i<this.afterDealArrInform.length; i++) {
+        afterCalTotalDevelopCostSum =  afterCalTotalDevelopCostSum + (parseFloat(this.afterDealArrInform[i].developCostSum) || 0)
+      }
+      this.afterCalTotalDevelopCostSum = afterCalTotalDevelopCostSum
+    },
+    calTotalProjectDeductMoneySum() {
+      let afterCalTotalDeductMoneySum = 0
+      for(let i=0; i<this.afterDealArrInform.length; i++) {
+        afterCalTotalDeductMoneySum =  afterCalTotalDeductMoneySum + (parseFloat(this.afterDealArrInform[i].deductMoneySum) || 0)
+      }
+      this.afterCalTotalDeductMoneySum = afterCalTotalDeductMoneySum
     },
 
     getProjectDetailList(projectInfo) {
@@ -950,6 +1013,10 @@ export default {
         this.getAuxProjectDesign(params),
         this.getAuxOtherRelated(params),
         this.getEntrustDevelop(params),
+
+        // 获取每个项目的研发支出和扣减金额
+        this.getDevelopCost(params),
+        this.getDeductMoney(params)
       ]).then(() => {
         // this.dealObjInformDataToObj(projectInfo);
         this.dealObjInformDataToArr(projectInfo);
@@ -1080,6 +1147,27 @@ export default {
       this.objInform[params.projectId].projectDesign = res.data.rows;
       // this.objInform[params.projectId].push({ projectDesign: res.data.rows });
     },
+
+    // 研发支出和扣减金额
+    // 研发支出
+    async getDevelopCost(params, index) {
+      let res = await getDevelopCost(params);
+      if (res.data == null) {
+        return;
+      }
+      this.objInform[params.projectId].developCost = res.data.rows;
+      // this.objInform[params.projectId].push({ projectDesign: res.data.rows });
+    },
+    // 扣减金额
+    async getDeductMoney(params, index) {
+      let res = await getDeductMoney(params);
+      if (res.data == null) {
+        return;
+      }
+      this.objInform[params.projectId].deductMoney = res.data.rows;
+      // this.objInform[params.projectId].push({ projectDesign: res.data.rows });
+    },
+
     // 其他相关费用由两部分组成：其他相关费用表中的四项 + 人工表三项（福利、补充医疗、补充养老）
     async getAuxOtherRelated(params, index) {
       let res = await queryAuxOtherRelatedExpenses(params);
@@ -1134,7 +1222,7 @@ export default {
         //   entrustDevelop: domesticRes.data.rows,
         // });
       }
-      // console.log("this.objInform", this.objInform)
+      // console.log("this.objInform=====", this.objInform)
     },
 
     // 获取项目是否完成信息
@@ -1150,6 +1238,51 @@ export default {
       // this.$refs.tableDataSummary.setCurrentRow(this.afterDealArrInform[this.afterDealArrInform.length-3])
       // this.$refs.tableDataSummary.setCurrentRow(this.afterDealArrInform[this.afterDealArrInform.length-2])
       // this.$refs.tableDataSummary.setCurrentRow(this.afterDealArrInform[this.afterDealArrInform.length-1])
+    },
+
+    // 生成 7012 表
+    create7012Table() {
+      let idList = []
+      this.tableData.forEach(i => idList.push(i.projectId))
+      this.$router.push({
+        path: "/pageDownLoad",
+        query: {
+          summaryMoneyParams: JSON.stringify(this.summaryMoney),
+          summaryExpenseMoneyParams: JSON.stringify(this.summaryExpenseMoney),
+          afterCalTotalDevelopCostSum: JSON.stringify(this.afterCalTotalDevelopCostSum),
+          afterCalTotalDeductMoneySum: JSON.stringify(this.afterCalTotalDeductMoneySum),
+          idList: JSON.stringify(idList),
+        },
+      });
+    },
+    // 
+    goToDownLoadPage() {
+      let idList = []
+      this.tableData.forEach(i => idList.push(i.projectId))
+      this.$router.push({
+        path: "/getInfoAndDownLoadPage",
+        query: {
+          summaryMoneyParams: JSON.stringify(this.summaryMoney),
+          summaryExpenseMoneyParams: JSON.stringify(this.summaryExpenseMoney),
+          afterCalTotalDevelopCostSum: JSON.stringify(this.afterCalTotalDevelopCostSum),
+          afterCalTotalDeductMoneySum: JSON.stringify(this.afterCalTotalDeductMoneySum),
+          idList: JSON.stringify(idList),
+        },
+      });
+    },
+    goToTestPage() {
+      let idList = []
+      this.tableData.forEach(i => idList.push(i.projectId))
+      this.$router.push({
+        path: "/test",
+        query: {
+          summaryMoneyParams: JSON.stringify(this.summaryMoney),
+          summaryExpenseMoneyParams: JSON.stringify(this.summaryExpenseMoney),
+          afterCalTotalDevelopCostSum: JSON.stringify(this.afterCalTotalDevelopCostSum),
+          afterCalTotalDeductMoneySum: JSON.stringify(this.afterCalTotalDeductMoneySum),
+          idList: JSON.stringify(idList),
+        },
+      });
     },
    
     // 格式化展示时间

@@ -95,3 +95,34 @@ export function queryAuxEntrustDevelop(params) {
     params
   })
 }
+// 研发支出和扣减金额
+// 研发支出
+export function getDevelopCost(params) {
+  return request({
+    url: `/getDevelopCost`,
+    method: "get",
+    params
+  })
+}
+// 扣减金额
+export function getDeductMoney(params) {
+  return request({
+    url: `/getDeductMoney`,
+    method: "get",
+    params
+  })
+}
+
+// 获取7012表文件
+export function get7012File() {
+  return request({
+    url: `/get7012File`,
+    method: "get",
+    withCredentials: true,
+    responseType: 'arrayBuffer',
+    onDownloadProgress: progress => {
+        console.log('下载进度:', progress);
+    }
+  })
+}
+

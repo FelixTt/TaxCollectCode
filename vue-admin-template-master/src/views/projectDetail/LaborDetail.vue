@@ -219,8 +219,24 @@ export default {
       // 对输入的数据进行计算，得到总和
       let ocpTmpArr = this.dialogTableData
       for(let i=0; i<ocpTmpArr.length; i++) {
-        let OtherThreeCostSum = parseFloat(ocpTmpArr[i].benefits) + parseFloat(ocpTmpArr[i].supplementaryMedicine) + parseFloat(ocpTmpArr[i].supplementaryRetirement)
+        // 计算其他三项之和
+        let OtherThreeCostSum = (parseFloat(ocpTmpArr[i].benefits) || 0) + (parseFloat(ocpTmpArr[i].supplementaryMedicine) || 0) + (parseFloat(ocpTmpArr[i].supplementaryRetirement) || 0)
         ocpTmpArr[i].OtherThreeCostSum = OtherThreeCostSum
+
+        // 计算占比 developTime / workTime
+        let labRate = 0
+        if(parseFloat(ocpTmpArr[i].developTime) != 0 && parseFloat(ocpTmpArr[i].developTime) != NaN) {
+          labRate = (parseFloat(ocpTmpArr[i].developTime / ocpTmpArr[i].workTime)).toFixed(2)
+        }
+        // 得到实际的 其他三项之和
+        let RealOtherThreeCostSum = 0
+        RealOtherThreeCostSum = OtherThreeCostSum * labRate
+        ocpTmpArr[i].RealOtherThreeCostSum = RealOtherThreeCostSum
+
+        // 得到实际人工费用
+        let RealLabExpense = 0
+        RealLabExpense = ((parseFloat(ocpTmpArr[i].salary) || 0) + (parseFloat(ocpTmpArr[i].performance) || 0) + (parseFloat(ocpTmpArr[i].retirement) || 0) + (parseFloat(ocpTmpArr[i].medical) || 0) + (parseFloat(ocpTmpArr[i].occupationalInjury) || 0) + (parseFloat(ocpTmpArr[i].unemployment) || 0) + (parseFloat(ocpTmpArr[i].fund) || 0)) * labRate
+        ocpTmpArr[i].RealLabExpense = RealLabExpense
       }
       this.dialogTableData = ocpTmpArr
 

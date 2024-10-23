@@ -186,7 +186,10 @@ export default {
       let ocpTmpArr = this.dialogTableData
       for(let i=0; i<ocpTmpArr.length; i++) {
         let consumeSum = parseFloat(ocpTmpArr[i].energyConsumption) * parseFloat(ocpTmpArr[i].electricityRate)
-        let occp = parseFloat(ocpTmpArr[i].developmentHours) / parseFloat(ocpTmpArr[i].workingHours)
+        let occp = 0
+        if(parseFloat(parseFloat(ocpTmpArr[i].workingHours) != 0 && parseFloat(ocpTmpArr[i].workingHours) != NaN)) {
+          occp = (parseFloat(ocpTmpArr[i].workingHours / ocpTmpArr[i].workingHours)).toFixed(2)
+        }
         let realConsumeSum = consumeSum * occp
         ocpTmpArr[i].consumeSum = consumeSum
         ocpTmpArr[i].occp = occp

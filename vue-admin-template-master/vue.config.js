@@ -91,6 +91,38 @@ module.exports = {
         symbolId: 'icon-[name]'
       })
       .end()
+    
+    //  // 先定义规则
+    //  const excelRule = config.module.rule('excel');
+    //  // 设置匹配规则
+    //  excelRule.test(/\.xlsx$/);
+    //  // 设置包含的目录（如果有）
+    //  excelRule.include.add(path.resolve(__dirname, 'src/assets'));
+    //  // 再设置使用的loader
+    //  excelRule.use('file-loader')
+    // .loader('file-loader')
+    // .options({
+    //       name: 'assets/[name].[ext]'
+    //   });
+    // config.module
+    // .rule('excel')
+    // .test(/\.xlsx$/)
+    // .use('file-loader')
+    // .loader('file-loader')
+    // .options({
+    //       name: 'assets/[name].[ext]'
+    //   });
+
+    // 以下打包没有成功，暂时注释起来
+    // config.module
+    //   .rule('excel')
+    //   .test(/\.xlsx$/)
+    //   .use('url-loader')
+    //   .loader('url-loader')
+    //   .options({
+    //         limit: 10000, // 如果文件小于10KB（可调整）则转换为Base64
+    //         name: 'assets/[name].[ext]'
+    //     });
 
     config
       .when(process.env.NODE_ENV !== 'development',
