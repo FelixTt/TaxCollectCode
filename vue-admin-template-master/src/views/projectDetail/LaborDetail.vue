@@ -1,6 +1,9 @@
 <template>
   <div class="content">
     <div class="btn-region" style="display: flex； justify-content:flex-end">
+      <el-button type="primary" size="medium" @click="addSigleTable">
+        新增
+      </el-button>
       <el-button type="primary" size="medium" @click="dialogVisible = true">
         批量导入
       </el-button>
@@ -15,48 +18,277 @@
         style="width: 100%; margin-top: 20px"
       >
         <el-table-column type="index" width="50"> </el-table-column>
-        <el-table-column prop="year" label="年份"> </el-table-column>
-        <el-table-column prop="month" label="月份"> </el-table-column>
-        <el-table-column prop="date" label="日期" width="90"> </el-table-column>
-        <el-table-column prop="category" label="种类"> </el-table-column>
-        <el-table-column prop="proof" label="凭证编号"> </el-table-column>
-        <el-table-column prop="abstract" label="摘要"> </el-table-column>
-        <el-table-column prop="department" label="参与部门"> </el-table-column>
+        <el-table-column prop="year" label="年份">
+          <template slot-scope="scope">
+            <el-select v-model="singleTableParams.year" v-if="scope.row.isEdit == true" placeholder="请选择">
+              <el-option
+                v-for="item in yearsOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+            <span v-else>
+              {{ scope.row.year }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="month" label="月份">
+          <template slot-scope="scope">
+            <el-select v-model="singleTableParams.month" v-if="scope.row.isEdit == true" placeholder="请选择">
+              <el-option
+                v-for="item in monthsOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+            <span v-else>
+              {{ scope.row.month }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="date" label="日期" width="90">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.date"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.date }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="category" label="种类">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.category"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.category }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="proof" label="凭证编号">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.proof"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.proof }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="abstract" label="摘要">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.abstract"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.abstract }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="department" label="参与部门">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.department"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.department }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="personName" label="研发人员名称">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.personName"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.personName }}
+            </span>
+          </template>
         </el-table-column>
-        <el-table-column prop="salary" label="工资薪金"> </el-table-column>
-        <el-table-column prop="performance" label="年终绩效"> </el-table-column>
-        <el-table-column prop="retirement" label="养老"> </el-table-column>
-        <el-table-column prop="medical" label="医疗"> </el-table-column>
-        <el-table-column prop="unemployment" label="失业"> </el-table-column>
+        <el-table-column prop="salary" label="工资薪金">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.salary"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.salary }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="performance" label="年终绩效">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.performance"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.performance }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="retirement" label="养老">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.retirement"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.retirement }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="medical" label="医疗">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.medical"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.medical }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="unemployment" label="失业">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.unemployment"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.unemployment }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="occupationalInjury" label="工伤">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.occupationalInjury"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.occupationalInjury }}
+            </span>
+          </template>
         </el-table-column>
-        <el-table-column prop="fund" label="公积金"> </el-table-column>
-        <el-table-column prop="benefits" label="其他福利"> </el-table-column>
+        <el-table-column prop="fund" label="公积金">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.fund"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.fund }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="benefits" label="其他福利">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.benefits"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.benefits }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column
           prop="supplementaryMedicine"
           label="补充医疗"
           width="180"
         >
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.supplementaryMedicine"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.supplementaryMedicine }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column
           prop="supplementaryRetirement"
           label="补充养老（或年金）"
           width="180"
         >
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.supplementaryRetirement"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.supplementaryRetirement }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="workTime" label="工作工时" width="180">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.workTime"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.workTime }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="developTime" label="研发工时" width="180">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.developTime"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.developTime }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
             <el-button
+              v-if="scope.row.isEdit !== true"
               @click.native.prevent="deleteRow(scope.$index, tableData)"
               type="text"
               size="small"
             >
               移除
+            </el-button>
+            <el-button
+              v-else
+              @click.native.prevent="saveSingleDataRow(scope.$index, tableData)"
+              type="text"
+              size="small"
+            >
+              保存
             </el-button>
           </template>
         </el-table-column>
@@ -80,7 +312,9 @@
         style="width: 100%; margin-top: 20px"
       >
         <el-table-column type="index" width="50"> </el-table-column>
-        <el-table-column prop="year" label="年份"> </el-table-column>
+        <el-table-column prop="year" label="年份">
+
+        </el-table-column>
         <el-table-column prop="month" label="月份"> </el-table-column>
         <el-table-column prop="date" label="日期"> </el-table-column>
         <el-table-column prop="category" label="种类"> </el-table-column>
@@ -135,7 +369,9 @@ import {
 
 import { updateStatisticsSummary } from "@/api/updateStatisticsSummary/statisticsSummary"
 import { formatDate } from "@/utils/validate";
+import { Rate } from 'element-ui';
 
+const { sort } = require('@/utils')
 export default {
   name: "LaborDetail",
   components: { UploadExcelComponent },
@@ -145,6 +381,75 @@ export default {
       tableData: [],
       dialogTableData: [],
       dialogVisible: false,
+      // 添加单条数据时，用来v-model
+      singleTableParams: {
+        year: "",
+        month: "",
+        category: "",
+        proof: "",
+        abstract: "",
+        department: "",
+        personName: "",
+        salary: "",
+        performance: "",
+        retirement: "",
+        medical: "",
+        unemployment: "",
+        occupationalInjury: "",
+        fund: "",
+        benefits: "",
+        supplementaryMedicine: "",
+        supplementaryRetirement: "",
+        workTime: "",
+        developTime: "",
+      },
+      yearsOptions: [{
+          value: '2024年',
+          label: '2024年'
+        }, {
+          value: '2025年',
+          label: '2025年'
+        }, {
+          value: '2026年',
+          label: '2026年'
+        }],
+      monthsOptions: [{
+          value: '1月',
+          label: '1月'
+        },{
+          value: '2月',
+          label: '2月'
+        },{
+          value: '3月',
+          label: '3月'
+        },{
+          value: '4月',
+          label: '4月'
+        },{
+          value: '5月',
+          label: '5月'
+        },{
+          value: '6月',
+          label: '6月'
+        },{
+          value: '7月',
+          label: '7月'
+        },{
+          value: '8月',
+          label: '8月'
+        },{
+          value: '9月',
+          label: '9月'
+        },{
+          value: '10月',
+          label: '10月'
+        },{
+          value: '11月',
+          label: '11月'
+        },{
+          value: '12月',
+          label: '12月'
+        }],
     };
   },
   mounted() {
@@ -163,6 +468,7 @@ export default {
         .then((res) => {
           if (res.data != null) {
             this.tableData = res.data.rows;
+            // this.tableData = sort(tableData)
             this.total = res.data.total;
           } else {
             this.tableData = [];
@@ -226,7 +532,7 @@ export default {
         // 计算占比 developTime / workTime
         let labRate = 0
         if(parseFloat(ocpTmpArr[i].developTime) != 0 && parseFloat(ocpTmpArr[i].developTime) != NaN) {
-          labRate = (parseFloat(ocpTmpArr[i].developTime / ocpTmpArr[i].workTime)).toFixed(2)
+          labRate = parseFloat(ocpTmpArr[i].developTime / ocpTmpArr[i].workTime)
         }
         // 得到实际的 其他三项之和
         let RealOtherThreeCostSum = 0
@@ -236,6 +542,7 @@ export default {
         // 得到实际人工费用
         let RealLabExpense = 0
         RealLabExpense = ((parseFloat(ocpTmpArr[i].salary) || 0) + (parseFloat(ocpTmpArr[i].performance) || 0) + (parseFloat(ocpTmpArr[i].retirement) || 0) + (parseFloat(ocpTmpArr[i].medical) || 0) + (parseFloat(ocpTmpArr[i].occupationalInjury) || 0) + (parseFloat(ocpTmpArr[i].unemployment) || 0) + (parseFloat(ocpTmpArr[i].fund) || 0)) * labRate
+        
         ocpTmpArr[i].RealLabExpense = RealLabExpense
       }
       this.dialogTableData = ocpTmpArr
@@ -257,6 +564,7 @@ export default {
       }
       this.dialogVisible = false;
       this.dialogTableData = [];
+      this.singleTableParams = {};
       // 更新汇总数据
 
         // addProjectLaborDetail(params).then((res) => {
@@ -723,6 +1031,33 @@ export default {
     showTableTime(time) {
       return formatDate(time);
       // return this.$Valid.formatDate(time);
+    },
+    addSigleTable() {
+      if (this.tableData.length === 0 || this.tableData[this.tableData.length -1].isEdit !== true) {
+        this.tableData.push({
+          isEdit: true,
+        });
+      } else {
+        this.$message({
+          message: "请添加信息完成后，再进行添加哦～",
+          type: "warning",
+        });
+      }
+    },
+    saveSingleDataRow() {
+      // 对插入数据进行校验
+      for(let key in this.singleTableParams) {
+        if(this.singleTableParams[key] === "") {
+          this.$message({
+            message: "插入数据项不能为空，请填写完成后再保存！",
+            type: "warning",
+          });
+          return
+        }
+      }
+      // 简单检验后，将数据放至 this.dialogTableData 中，复用之前的逻辑进行提交
+      this.dialogTableData.push(this.singleTableParams);
+      this.save();
     },
   },
   

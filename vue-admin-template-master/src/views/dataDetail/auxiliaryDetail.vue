@@ -90,15 +90,22 @@
       <el-divider content-position="center"> 以下为辅助帐明细表 </el-divider>
 
       <!-- :span-method="objectSpanMethod" -->
+        <!-- show-summary -->
       <el-table
         :data="tableData"
         border
         stripe
-        show-summary
         highlight-current-row
         style="width: 100%; margin-top: 20px"
       >
-        <el-table-column type="index" width="50"> </el-table-column>
+        <!-- <el-table-column type="index" width="50"> -->
+        <el-table-column width="50">
+          <template slot-scope="scope">
+            <!-- 使用$index显示行号 -->
+            <span>{{ scope.$index === 0 ? '合计金额' : scope.$index }}</span>
+            <!-- 其他操作按钮或链接 -->
+          </template>
+        </el-table-column>
         <!-- <el-table-column prop="year" label="年份" width="50"> </el-table-column>
         <el-table-column prop="month" label="月份" > </el-table-column> -->
         <el-table-column label="凭证信息" align="center">
@@ -110,7 +117,10 @@
         <el-table-column label="费用明细" align="center">
           <el-table-column prop="profileCostEtc" label="本年累计归集金额">
           </el-table-column>
-          <el-table-column prop="totalSalary" label="人员人工费用">
+          <el-table-column label="人员人工费用">
+            <template slot-scope="scope">
+              {{ (scope.row.totalSalary === undefined) ? '' : new Number(scope.row.totalSalary).toFixed(2) }}
+            </template>
           </el-table-column>
           <el-table-column prop="totalDirectInputSum" label="直接投入费用">
           </el-table-column>
@@ -191,14 +201,15 @@ export default {
   mounted() {
     this.initData();
     // this.getProjectDetailList()
-    this.$nextTick(() => {
-      this.showSummariesPosition();
-    });
+    // this.$nextTick(() => {
+    //   this.showSummariesPosition();
+    // });
   },
-  destroyed() {
-    //进行销毁
-    this.showSummariesPosition();
-  },
+  // 这里本来是element ui 自动求和，但是不满足我们需求，所以自行求和
+  // destroyed() {
+  //   //进行销毁
+  //   this.showSummariesPosition();
+  // },
   methods: {
     initData() {
       this.params = JSON.parse(this.$route.query.params);
@@ -227,22 +238,24 @@ export default {
         projectId,
         year,
       };
-
-      // 人员人工费用
-      this.getAuxLabSalary(params);
-      // 直接投入费用
-      this.getAuxDirectInput(params);
-      // 折旧费用
-      this.getAuxDepreciation(params);
-      // 无形资产摊销
-      this.getAuxIntangibleAssets(params);
-      // 新产品设计费等
-      this.getAuxProjectDesign(params);
-      // 其他相关费用
-      this.getAuxOtherRelated(params);
-      // 委托研发支出
-      this.getEntrustDevelop(params);
-
+      Promise.all([
+        // 人员人工费用
+        this.getAuxLabSalary(params),
+        // 直接投入费用
+        this.getAuxDirectInput(params),
+        // 折旧费用
+        this.getAuxDepreciation(params),
+        // 无形资产摊销
+        this.getAuxIntangibleAssets(params),
+        // 新产品设计费等
+        this.getAuxProjectDesign(params),
+        // 其他相关费用
+        this.getAuxOtherRelated(params),
+        // 委托研发支出
+        this.getEntrustDevelop(params),
+      ]).then(() => {
+        this.getAllDetailSum();
+      })
       // month, category, proof, abstract, $profileCostEtc, totalSalary, totalDirectInputSum, totalRealMonthlyDepreciation, totalRealMonthlyDepreciation, totalRealMonthlyAmortization, totalOtherRelatedExpensessum, totalDomesticCompCostSum, totalAbroadSum
       // 对this.tableData 数据进行处理
     },
@@ -406,6 +419,39 @@ export default {
         }
         this.tableData.push(...domesticDataArr);
       }
+    },
+
+    // 手工求和
+    getAllDetailSum() {
+      let getLabSalaryAllDetailSum = 0
+      let getDirectInputAllDetailSum = 0
+      let getDepreciationAllDetailSum = 0
+      let getIntangibleAssetsAllDetailSum = 0
+      let getProjectDesignAllDetailSum = 0
+      let getOtherRelatedAllDetailSum = 0
+      let getEntrustDevelopDomesticAllDetailSum = 0
+      let getEntrustDevelopAbroadAllDetailSum = 0
+
+      for(let i=0; i<this.tableData.length; i++) {
+        getLabSalaryAllDetailSum = getLabSalaryAllDetailSum + (this.tableData[i].totalSalary || 0)
+        getDirectInputAllDetailSum = getDirectInputAllDetailSum + (this.tableData[i].totalDirectInputSum || 0)
+        getDepreciationAllDetailSum = getDepreciationAllDetailSum + (this.tableData[i].totalRealMonthlyDepreciation || 0)
+        getIntangibleAssetsAllDetailSum = getIntangibleAssetsAllDetailSum + (this.tableData[i].totalRealMonthlyAmortization || 0)
+        getProjectDesignAllDetailSum = getProjectDesignAllDetailSum + (this.tableData[i].totalCostsum || 0)
+        getOtherRelatedAllDetailSum = getOtherRelatedAllDetailSum + (this.tableData[i].totalOtherRelatedExpensessum || 0)
+        getEntrustDevelopDomesticAllDetailSum = getEntrustDevelopDomesticAllDetailSum + (this.tableData[i].totalDomesticCompCostSum || 0)
+        getEntrustDevelopAbroadAllDetailSum = getEntrustDevelopAbroadAllDetailSum + (this.tableData[i].totalAbroadSum || 0)
+      }
+      let sumObj = {}
+      sumObj['totalSalary'] = getLabSalaryAllDetailSum
+      sumObj['totalDirectInputSum'] = getDirectInputAllDetailSum
+      sumObj['totalRealMonthlyDepreciation'] = getDepreciationAllDetailSum
+      sumObj['totalRealMonthlyAmortization'] = getIntangibleAssetsAllDetailSum
+      sumObj['totalCostsum'] = getProjectDesignAllDetailSum
+      sumObj['totalOtherRelatedExpensessum'] = getOtherRelatedAllDetailSum
+      sumObj['totalDomesticCompCostSum'] = getEntrustDevelopDomesticAllDetailSum
+      sumObj['totalAbroadSum'] = getEntrustDevelopAbroadAllDetailSum
+      this.tableData.splice(0, 0, sumObj)
     },
 
     // 格式化展示时间

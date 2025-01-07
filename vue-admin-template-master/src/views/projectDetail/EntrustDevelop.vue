@@ -1,6 +1,9 @@
 <template>
   <div class="content">
     <div class="btn-region" style="display: flex; justify-content:flex-start">
+      <el-button type="primary" size="medium" @click="addSigleTable">
+        新增
+      </el-button>
       <el-button type="primary" size="medium" @click="dialogVisible = true">
         批量导入
       </el-button>
@@ -15,32 +18,150 @@
         style="width: 100%; margin-top: 20px"
       >
         <el-table-column type="index" width="50"> </el-table-column>
-        <el-table-column prop="year" label="年份"> </el-table-column>
-        <el-table-column prop="month" label="月份"> </el-table-column>
-        <el-table-column prop="date" label="日期"> </el-table-column>
+        <el-table-column prop="year" label="年份">
+          <template slot-scope="scope">
+            <el-select v-model="singleTableParams.year" v-if="scope.row.isEdit == true" placeholder="请选择">
+              <el-option
+                v-for="item in yearsOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+            <span v-else>
+              {{ scope.row.year }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="month" label="月份">
+          <template slot-scope="scope">
+            <el-select v-model="singleTableParams.month" v-if="scope.row.isEdit == true" placeholder="请选择">
+              <el-option
+                v-for="item in monthsOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+            <span v-else>
+              {{ scope.row.month }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="date" label="日期">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.date"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.date }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="projectNum" label="研发项目序号">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.projectNum"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.projectNum }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="category" label="种类">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.category"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.category }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="proof" label="编号">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.proof"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.proof }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="abstract" label="摘要">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.abstract"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.abstract }}
+            </span>
+          </template>
         </el-table-column>
-         <el-table-column prop="domesticCompCost" label="委托境内机构或个人进行研发活动所发生的费用">
+        <el-table-column prop="domesticCompCost" label="委托境内机构或个人进行研发活动所发生的费用">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.domesticCompCost"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.domesticCompCost }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="abroadCompCost" label="委托境外机构进行研发活动所发生的费用">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.abroadCompCost"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.abroadCompCost }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="abroadPerCost" label="委托境外个人进行研发活动所发生的费用">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.abroadPerCost"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.abroadPerCost }}
+            </span>
+          </template>
         </el-table-column>
 			
         <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
             <el-button
+              v-if="scope.row.isEdit !== true"
               @click.native.prevent="deleteRow(scope.$index, tableData)"
               type="text"
               size="small"
             >
               移除
+            </el-button>
+            <el-button
+              v-else
+              @click.native.prevent="saveSingleDataRow(scope.$index, tableData)"
+              type="text"
+              size="small"
+            >
+              保存
             </el-button>
           </template>
         </el-table-column>
@@ -114,6 +235,66 @@ export default {
       // tableHeader: [],
       dialogTableData: [],
       dialogVisible: false,
+       // 添加单条数据时，用来v-model
+      singleTableParams: {
+        year: "",
+        month: "",
+        date: "",
+        projectNum: "",
+        category: "",
+        proof: "",
+        abstract: "",
+        domesticCompCost: "",
+        abroadCompCost: "",
+        abroadPerCost: "",
+      },
+      yearsOptions: [{
+          value: '2024年',
+          label: '2024年'
+        }, {
+          value: '2025年',
+          label: '2025年'
+        }, {
+          value: '2026年',
+          label: '2026年'
+        }],
+      monthsOptions: [{
+          value: '1月',
+          label: '1月'
+        },{
+          value: '2月',
+          label: '2月'
+        },{
+          value: '3月',
+          label: '3月'
+        },{
+          value: '4月',
+          label: '4月'
+        },{
+          value: '5月',
+          label: '5月'
+        },{
+          value: '6月',
+          label: '6月'
+        },{
+          value: '7月',
+          label: '7月'
+        },{
+          value: '8月',
+          label: '8月'
+        },{
+          value: '9月',
+          label: '9月'
+        },{
+          value: '10月',
+          label: '10月'
+        },{
+          value: '11月',
+          label: '11月'
+        },{
+          value: '12月',
+          label: '12月'
+        }],
     };
   },
   mounted() {
@@ -203,6 +384,7 @@ export default {
       }
       this.dialogVisible = false;
       this.dialogTableData = [];
+      this.singleTableParams = {};
     },
 
     // 数据处理，替换key值
@@ -273,6 +455,33 @@ export default {
     showTableTime(time) {
       return formatDate(time);
       // return this.$Valid.formatDate(time);
+    },
+    addSigleTable() {
+      if (this.tableData.length === 0 || this.tableData[this.tableData.length -1].isEdit !== true) {
+        this.tableData.push({
+          isEdit: true,
+        });
+      } else {
+        this.$message({
+          message: "请添加信息完成后，再进行添加哦～",
+          type: "warning",
+        });
+      }
+    },
+    saveSingleDataRow() {
+      // 对插入数据进行校验
+      for(let key in this.singleTableParams) {
+        if(this.singleTableParams[key] === "") {
+          this.$message({
+            message: "插入数据项不能为空，请填写完成后再保存！",
+            type: "warning",
+          });
+          return
+        }
+      }
+      // 简单检验后，将数据放至 this.dialogTableData 中，复用之前的逻辑进行提交
+      this.dialogTableData.push(this.singleTableParams);
+      this.save();
     },
   },
 };

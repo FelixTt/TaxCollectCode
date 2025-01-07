@@ -113,5 +113,19 @@ export function param2Obj(url) {
       obj[name] = val
     }
   })
-  return obj
+  return objs
+}
+
+export function sort(dateArr) {
+  console.log("dateArr", dateArr)
+  // let months = ["January", "February", "March", "April", "May", "June",
+  //   "July", "August", "September", "October", "November", "December"];
+  // let months = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"]
+  dateArr.sort((a, b) => {
+    if (a.year !== b.year) {
+      return parseInt(a.year.split("年")[0]) < parseInt(b.year.split("年")[0]) ? -1 : 1
+    } else {
+      return parseInt(a.month.split("月")[0]) - parseInt(a.month.split("月")[0]);
+    }
+  });
 }

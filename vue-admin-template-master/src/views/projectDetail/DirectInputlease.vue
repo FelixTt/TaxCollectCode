@@ -1,6 +1,9 @@
 <template>
   <div class="content">
     <div class="btn-region" style="display: flex； justify-content:flex-end">
+      <el-button type="primary" size="medium" @click="addSigleTable">
+        新增
+      </el-button>
       <el-button type="primary" size="medium" @click="dialogVisible = true">
         批量导入
       </el-button>
@@ -15,27 +18,125 @@
         style="width: 100%; margin-top: 20px"
       >
         <el-table-column type="index" width="50"> </el-table-column>
-        <el-table-column prop="year" label="年份"> </el-table-column>
-        <el-table-column prop="month" label="月份"> </el-table-column>
+        <el-table-column prop="year" label="年份">
+          <template slot-scope="scope">
+            <el-select v-model="singleTableParams.year" v-if="scope.row.isEdit == true" placeholder="请选择">
+              <el-option
+                v-for="item in yearsOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+            <span v-else>
+              {{ scope.row.year }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="month" label="月份">
+          <template slot-scope="scope">
+            <el-select v-model="singleTableParams.month" v-if="scope.row.isEdit == true" placeholder="请选择">
+              <el-option
+                v-for="item in monthsOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+            <span v-else>
+              {{ scope.row.month }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="equipmentNumber" label="设备编号">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.equipmentNumber"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.equipmentNumber }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="equipmentName" label="研发设备名称">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.equipmentName"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.equipmentName }}
+            </span>
+          </template>
         </el-table-column>
-        <el-table-column prop="expenseType" label="费用类型"> </el-table-column>
+        <el-table-column prop="expenseType" label="费用类型">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.expenseType"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.expenseType }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="monthlyDepreciation" label="月折旧额 （元）">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.monthlyDepreciation"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.monthlyDepreciation }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="workingHours" label="工作工时">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.workingHours"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.workingHours }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="developmentHours" label="研发工时">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.developmentHours"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.developmentHours }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
             <el-button
+              v-if="scope.row.isEdit !== true"
               @click.native.prevent="deleteRow(scope.$index, tableData)"
               type="text"
               size="small"
             >
               移除
+            </el-button>
+            <el-button
+              v-else
+              @click.native.prevent="saveSingleDataRow(scope.$index, tableData)"
+              type="text"
+              size="small"
+            >
+              保存
             </el-button>
           </template>
         </el-table-column>
@@ -91,7 +192,7 @@ import {
   deleteDirectInputleaseDetail,
 } from "@/api/projectDetailApi/DirectInputlease";
 
-import { updateDirectInputlease } from '@/api/updateStatisticsSummary/statisticsSummary.js'
+import { updateDirectInputlease } from "@/api/updateStatisticsSummary/statisticsSummary.js";
 import { formatDate } from "@/utils/validate";
 
 export default {
@@ -100,10 +201,70 @@ export default {
   props: ["passData"],
   data() {
     return {
+      // 用来展示表格数据
       tableData: [],
       // tableHeader: [],
+      // 用来添加 / 批量添加数据时向后端发送的数据
       dialogTableData: [],
       dialogVisible: false,
+      // 添加单条数据时，用来v-model
+      singleTableParams: {
+        year: "",
+        month: "",
+        equipmentNumber: "",
+        equipmentName: "",
+        expenseType: "",
+        monthlyDepreciation: "",
+        workingHours: "",
+        developmentHours: "",
+      },
+      yearsOptions: [{
+          value: '2024年',
+          label: '2024年'
+        }, {
+          value: '2025年',
+          label: '2025年'
+        }, {
+          value: '2026年',
+          label: '2026年'
+        }],
+      monthsOptions: [{
+          value: '1月',
+          label: '1月'
+        },{
+          value: '2月',
+          label: '2月'
+        },{
+          value: '3月',
+          label: '3月'
+        },{
+          value: '4月',
+          label: '4月'
+        },{
+          value: '5月',
+          label: '5月'
+        },{
+          value: '6月',
+          label: '6月'
+        },{
+          value: '7月',
+          label: '7月'
+        },{
+          value: '8月',
+          label: '8月'
+        },{
+          value: '9月',
+          label: '9月'
+        },{
+          value: '10月',
+          label: '10月'
+        },{
+          value: '11月',
+          label: '11月'
+        },{
+          value: '12月',
+          label: '12月'
+        }],
     };
   },
   mounted() {
@@ -127,7 +288,7 @@ export default {
             this.tableData = [];
             this.total = 0;
           }
-          return res.data.rows
+          return res.data.rows;
         })
         .catch((err) => {});
     },
@@ -145,20 +306,26 @@ export default {
       return false;
     },
     handleSuccess({ results, header }) {
-      let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
-      let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
+      let startYear = new Date(
+        this.showTableTime(this.passData.startDate)
+      ).getFullYear();
+      let endYear = new Date(
+        this.showTableTime(this.passData.endDate)
+      ).getFullYear();
       // 对导入的时间做一个校验，导入的时间必须在项目开始时间和结束时间之间！
       try {
-        for(let i=0; i<results.length; i++) {
-        let inputYear = parseInt(results[i]["年份"].split("年")[0])
-        if(inputYear < startYear || inputYear > endYear) {
-          this.$message.error("导入失败，请检查导入时间是否包含在项目开始时间和结束时间之间！");
-          return
+        for (let i = 0; i < results.length; i++) {
+          let inputYear = parseInt(results[i]["年份"].split("年")[0]);
+          if (inputYear < startYear || inputYear > endYear) {
+            this.$message.error(
+              "导入失败，请检查导入时间是否包含在项目开始时间和结束时间之间！"
+            );
+            return;
+          }
         }
-      }
       } catch (error) {
         this.$message.error("导入失败，请检查导入数据格式是否正确！");
-        return
+        return;
       }
       this.$message.success("导入成功！");
       let newData = this.dealData(results);
@@ -170,20 +337,24 @@ export default {
         return;
       }
 
-       // 对输入的数据进行计算占比，得到 自有设备研发折旧额（元）
-      let ocpTmpArr = this.dialogTableData
-      for(let i=0; i<ocpTmpArr.length; i++) {
-        let rate = 0
-        if(parseFloat(ocpTmpArr[i].workingHours) != 0 && parseFloat(ocpTmpArr[i].workingHours) != NaN) {
-          rate = parseFloat(ocpTmpArr[i].developmentHours) / parseFloat(ocpTmpArr[i].workingHours)
+      // 对输入的数据进行计算占比，得到 自有设备研发折旧额（元）
+      let ocpTmpArr = this.dialogTableData;
+      for (let i = 0; i < ocpTmpArr.length; i++) {
+        let rate = 0;
+        if (
+          parseFloat(ocpTmpArr[i].workingHours) != 0 &&
+          parseFloat(ocpTmpArr[i].workingHours) != NaN
+        ) {
+          rate =
+            parseFloat(ocpTmpArr[i].developmentHours) /
+            parseFloat(ocpTmpArr[i].workingHours);
         }
-        let realDirectInputlease = ocpTmpArr[i].monthlyDepreciation * rate
-        ocpTmpArr[i].rate = rate 
-        ocpTmpArr[i].realDirectInputlease = realDirectInputlease
+        let realDirectInputlease = ocpTmpArr[i].monthlyDepreciation * rate;
+        ocpTmpArr[i].rate = rate;
+        ocpTmpArr[i].realDirectInputlease = realDirectInputlease;
       }
       // console.log("ocpTmpArr", ocpTmpArr)
-      this.dialogTableData = ocpTmpArr
-
+      this.dialogTableData = ocpTmpArr;
 
       let params = {
         userID: this.$store.getters.id,
@@ -191,11 +362,11 @@ export default {
         tableDate: this.dialogTableData,
       };
 
-      let succRes = null
-      let newList = null
+      let succRes = null;
+      let newList = null;
       try {
-        succRes = await addDirectInputleaseDetail(params)
-        newList = await this.getDirectInputlease()
+        succRes = await addDirectInputleaseDetail(params);
+        newList = await this.getDirectInputlease();
         this.$message.success(succRes.message);
         // this.updateStaticsData(newList)
       } catch (error) {
@@ -203,25 +374,90 @@ export default {
       }
       this.dialogVisible = false;
       this.dialogTableData = [];
+      this.singleTableParams = {};
     },
     async updateStaticsData(data) {
-      let startYear = new Date(this.showTableTime(this.passData.startDate)).getFullYear()
-      let endYear = new Date(this.showTableTime(this.passData.endDate)).getFullYear()
-      for(let i=0; i<endYear-startYear+1; i++) {
-        let year = (startYear + i) + "年"
-        let JanDirectInputleaseSum = this.statsDirectInputlease(year, data, "1月")
-        let FebDirectInputleaseSum = this.statsDirectInputlease(year, data, "2月")
-        let MarDirectInputleaseSum = this.statsDirectInputlease(year, data, "3月")
-        let AprDirectInputleaseSum = this.statsDirectInputlease(year, data, "4月")
-        let MayDirectInputleaseSum = this.statsDirectInputlease(year, data, "5月")
-        let JunDirectInputleaseSum = this.statsDirectInputlease(year, data, "6月")
-        let JulDirectInputleaseSum = this.statsDirectInputlease(year, data, "7月")
-        let AugDirectInputleaseSum = this.statsDirectInputlease(year, data, "8月")
-        let SepDirectInputleaseSum = this.statsDirectInputlease(year, data, "9月")
-        let OctDirectInputleaseSum = this.statsDirectInputlease(year, data, "10月")
-        let NovDirectInputleaseSum = this.statsDirectInputlease(year, data, "11月")
-        let DecDirectInputleaseSum = this.statsDirectInputlease(year, data, "12月")
-        let yearDirectInputleaseSum = JanDirectInputleaseSum + FebDirectInputleaseSum + MarDirectInputleaseSum + AprDirectInputleaseSum + MayDirectInputleaseSum + JunDirectInputleaseSum + JulDirectInputleaseSum + AugDirectInputleaseSum + SepDirectInputleaseSum + OctDirectInputleaseSum + NovDirectInputleaseSum + DecDirectInputleaseSum
+      let startYear = new Date(
+        this.showTableTime(this.passData.startDate)
+      ).getFullYear();
+      let endYear = new Date(
+        this.showTableTime(this.passData.endDate)
+      ).getFullYear();
+      for (let i = 0; i < endYear - startYear + 1; i++) {
+        let year = startYear + i + "年";
+        let JanDirectInputleaseSum = this.statsDirectInputlease(
+          year,
+          data,
+          "1月"
+        );
+        let FebDirectInputleaseSum = this.statsDirectInputlease(
+          year,
+          data,
+          "2月"
+        );
+        let MarDirectInputleaseSum = this.statsDirectInputlease(
+          year,
+          data,
+          "3月"
+        );
+        let AprDirectInputleaseSum = this.statsDirectInputlease(
+          year,
+          data,
+          "4月"
+        );
+        let MayDirectInputleaseSum = this.statsDirectInputlease(
+          year,
+          data,
+          "5月"
+        );
+        let JunDirectInputleaseSum = this.statsDirectInputlease(
+          year,
+          data,
+          "6月"
+        );
+        let JulDirectInputleaseSum = this.statsDirectInputlease(
+          year,
+          data,
+          "7月"
+        );
+        let AugDirectInputleaseSum = this.statsDirectInputlease(
+          year,
+          data,
+          "8月"
+        );
+        let SepDirectInputleaseSum = this.statsDirectInputlease(
+          year,
+          data,
+          "9月"
+        );
+        let OctDirectInputleaseSum = this.statsDirectInputlease(
+          year,
+          data,
+          "10月"
+        );
+        let NovDirectInputleaseSum = this.statsDirectInputlease(
+          year,
+          data,
+          "11月"
+        );
+        let DecDirectInputleaseSum = this.statsDirectInputlease(
+          year,
+          data,
+          "12月"
+        );
+        let yearDirectInputleaseSum =
+          JanDirectInputleaseSum +
+          FebDirectInputleaseSum +
+          MarDirectInputleaseSum +
+          AprDirectInputleaseSum +
+          MayDirectInputleaseSum +
+          JunDirectInputleaseSum +
+          JulDirectInputleaseSum +
+          AugDirectInputleaseSum +
+          SepDirectInputleaseSum +
+          OctDirectInputleaseSum +
+          NovDirectInputleaseSum +
+          DecDirectInputleaseSum;
 
         let MonthInfo = {
           JanDirectInputleaseSum,
@@ -237,43 +473,45 @@ export default {
           NovDirectInputleaseSum,
           DecDirectInputleaseSum,
           yearDirectInputleaseSum,
-          year
-        }
+          year,
+        };
         // 将数据存储起来
         let params = {
           userID: this.$store.getters.id,
           projectID: this.passData.projectId,
           tableDate: this.dialogTableData,
-          MonthInfo
+          MonthInfo,
         };
-        
-        let res = await updateDirectInputlease(params)
-        if(res.code === 200) {
+
+        let res = await updateDirectInputlease(params);
+        if (res.code === 200) {
           this.$message.success(res.message);
         } else {
           this.$message.error(res.message);
         }
       }
     },
-    statsDirectInputlease(year, rows, month){
+    statsDirectInputlease(year, rows, month) {
       let sum = 0;
-      if(rows == undefined || rows.length === 0) {
-        return 0
+      if (rows == undefined || rows.length === 0) {
+        return 0;
       }
-      for(let i = 0; i < rows.length; i++) {
-        if(rows[i].year !== year) {
-          continue
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].year !== year) {
+          continue;
         }
-        if(rows[i].month === month) {
-          if(parseFloat(rows[i].workingHours) === 0) {
-            continue
+        if (rows[i].month === month) {
+          if (parseFloat(rows[i].workingHours) === 0) {
+            continue;
           } else {
-            let rate = parseFloat(rows[i].developmentHours) / parseFloat(rows[i].workingHours)
-            sum = sum + rate * parseFloat(rows[i].monthlyDepreciation)
+            let rate =
+              parseFloat(rows[i].developmentHours) /
+              parseFloat(rows[i].workingHours);
+            sum = sum + rate * parseFloat(rows[i].monthlyDepreciation);
           }
         }
       }
-      return sum
+      return sum;
     },
 
     // 数据处理，替换key值
@@ -326,9 +564,9 @@ export default {
         projectID: this.passData.projectId,
       };
 
-      let succRes = await deleteDirectInputleaseDetail(params)
+      let succRes = await deleteDirectInputleaseDetail(params);
       this.$message.success(succRes.message);
-      let newList = await this.getDirectInputlease()
+      let newList = await this.getDirectInputlease();
 
       // 更新汇总数据
       // this.updateStaticsData(newList)
@@ -336,6 +574,33 @@ export default {
     // 格式化展示时间
     showTableTime(time) {
       return formatDate(time);
+    },
+    addSigleTable() {
+      if (this.tableData.length === 0 || this.tableData[this.tableData.length -1].isEdit !== true) {
+        this.tableData.push({
+          isEdit: true,
+        });
+      } else {
+        this.$message({
+          message: "请添加信息完成后，再进行添加哦～",
+          type: "warning",
+        });
+      }
+    },
+    saveSingleDataRow() {
+      // 对插入数据进行校验
+      for(let key in this.singleTableParams) {
+        if(this.singleTableParams[key] === "") {
+          this.$message({
+            message: "插入数据项不能为空，请填写完成后再保存！",
+            type: "warning",
+          });
+          return
+        }
+      }
+      // 简单检验后，将数据放至 this.dialogTableData 中，复用之前的逻辑进行提交
+      this.dialogTableData.push(this.singleTableParams);
+      this.save();
     },
   },
 };

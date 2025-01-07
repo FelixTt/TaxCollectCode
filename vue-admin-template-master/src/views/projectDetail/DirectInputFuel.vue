@@ -1,6 +1,9 @@
 <template>
   <div class="content">
     <div class="btn-region" style="display: flex； justify-content:flex-end">
+      <el-button type="primary" size="medium" @click="addSigleTable">
+        新增
+      </el-button>
       <el-button type="primary" size="medium" @click="dialogVisible = true">
         批量导入
       </el-button>
@@ -15,17 +18,95 @@
         style="width: 100%; margin-top: 20px"
       >
         <el-table-column type="index" width="50"> </el-table-column>
-        <el-table-column prop="year" label="年份"> </el-table-column>
-        <el-table-column prop="month" label="月份"> </el-table-column>
+        <el-table-column prop="year" label="年份">
+          <template slot-scope="scope">
+            <el-select v-model="singleTableParams.year" v-if="scope.row.isEdit == true" placeholder="请选择">
+              <el-option
+                v-for="item in yearsOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+            <span v-else>
+              {{ scope.row.year }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="month" label="月份">
+          <template slot-scope="scope">
+            <el-select v-model="singleTableParams.month" v-if="scope.row.isEdit == true" placeholder="请选择">
+              <el-option
+                v-for="item in monthsOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+            <span v-else>
+              {{ scope.row.month }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="equipmentName" label="设备名称">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.equipmentName"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.equipmentName }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="energyConsumption" label="当月燃料、动力能耗（KWH/吨/立方米）">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.energyConsumption"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.energyConsumption }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="electricityRate" label="单价">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.electricityRate"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.electricityRate }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="workingHours" label="工作工时">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.workingHours"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.workingHours }}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column prop="developmentHours" label="研发工时">
+          <template slot-scope="scope">
+            <el-input
+              v-if="scope.row.isEdit == true"
+              v-model="singleTableParams.developmentHours"
+            >
+            </el-input>
+            <span v-else>
+              {{ scope.row.developmentHours }}
+            </span>
+          </template>
         </el-table-column>
         <!-- <el-table-column prop="waterRate" label="研发分配水费（元）">
         </el-table-column>
@@ -37,11 +118,20 @@
         <el-table-column fixed="right" label="操作" width="120">
           <template slot-scope="scope">
             <el-button
+              v-if="scope.row.isEdit !== true"
               @click.native.prevent="deleteRow(scope.$index, tableData)"
               type="text"
               size="small"
             >
               移除
+            </el-button>
+            <el-button
+              v-else
+              @click.native.prevent="saveSingleDataRow(scope.$index, tableData)"
+              type="text"
+              size="small"
+            >
+              保存
             </el-button>
           </template>
         </el-table-column>
@@ -116,6 +206,63 @@ export default {
       // tableHeader: [],
       dialogTableData: [],
       dialogVisible: false,
+       // 添加单条数据时，用来v-model
+      singleTableParams: {
+        year: "",
+        month: "",
+        equipmentName: "",
+        energyConsumption: "",
+        electricityRate: "",
+        workingHours: "",
+        developmentHours: "",
+      },
+      yearsOptions: [{
+          value: '2024年',
+          label: '2024年'
+        }, {
+          value: '2025年',
+          label: '2025年'
+        }, {
+          value: '2026年',
+          label: '2026年'
+        }],
+      monthsOptions: [{
+          value: '1月',
+          label: '1月'
+        },{
+          value: '2月',
+          label: '2月'
+        },{
+          value: '3月',
+          label: '3月'
+        },{
+          value: '4月',
+          label: '4月'
+        },{
+          value: '5月',
+          label: '5月'
+        },{
+          value: '6月',
+          label: '6月'
+        },{
+          value: '7月',
+          label: '7月'
+        },{
+          value: '8月',
+          label: '8月'
+        },{
+          value: '9月',
+          label: '9月'
+        },{
+          value: '10月',
+          label: '10月'
+        },{
+          value: '11月',
+          label: '11月'
+        },{
+          value: '12月',
+          label: '12月'
+        }],
     };
   },
   mounted() {
@@ -214,6 +361,7 @@ export default {
       }
       this.dialogVisible = false;
       this.dialogTableData = [];
+      this.singleTableParams = {};
     },
     // 汇总统计更新
     async updateStaticsData(data) {
@@ -460,6 +608,33 @@ export default {
     // 格式化展示时间
     showTableTime(time) {
       return formatDate(time);
+    },
+    addSigleTable() {
+      if (this.tableData.length === 0 || this.tableData[this.tableData.length -1].isEdit !== true) {
+        this.tableData.push({
+          isEdit: true,
+        });
+      } else {
+        this.$message({
+          message: "请添加信息完成后，再进行添加哦～",
+          type: "warning",
+        });
+      }
+    },
+    saveSingleDataRow() {
+      // 对插入数据进行校验
+      for(let key in this.singleTableParams) {
+        if(this.singleTableParams[key] === "") {
+          this.$message({
+            message: "插入数据项不能为空，请填写完成后再保存！",
+            type: "warning",
+          });
+          return
+        }
+      }
+      // 简单检验后，将数据放至 this.dialogTableData 中，复用之前的逻辑进行提交
+      this.dialogTableData.push(this.singleTableParams);
+      this.save();
     },
   },
 };

@@ -424,7 +424,7 @@ function queryOtherThreeCostSum(req, res, next) {
         pageSize = pageSize ? pageSize : 1;
         pageNo = pageNo ? pageNo : 1;
 
-        let query = `SELECT month, proof, abstract, category, SUM(OtherThreeCostSum) AS totalOtherThreeCostSum FROM laborDetail WHERE projectId=${projectId} AND  year = '${year}' GROUP BY month, proof, abstract, category ORDER BY month;`;
+        let query = `SELECT month, proof, abstract, category, SUM(RealOtherThreeCostSum) AS totalOtherThreeCostSum FROM laborDetail WHERE projectId=${projectId} AND  year = '${year}' GROUP BY month, proof, abstract, category ORDER BY month;`;
 
         querySql(query)
             .then(data => {

@@ -534,7 +534,7 @@ export default {
         this.total = 0;
       }
 
-      this.loading = false;
+      
       for (let i = 0; i < this.tableData.length; i++) {
         // 这里进行初始化对象
         this.objInform[this.tableData[i].projectId] = {};
@@ -569,6 +569,8 @@ export default {
       // 计算所有项目的研发费用和扣减金额
       this.calTotalProjectDevelopCostSum()
       this.calTotalProjectDeductMoneySum()
+
+      this.loading = false;
 
       // console.log("数据处理完成后=--------==----",this.afterDealArrInform)
     },
