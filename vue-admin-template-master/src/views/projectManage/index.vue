@@ -147,6 +147,7 @@
         </el-form-item>
         <el-form-item label="是否完成">
           <el-switch v-model="formValidate.isFinish"></el-switch>
+          <span> {{formValidate.isFinish === true ? '已' : "未" }}完成 </span>
         </el-form-item>
         <el-form-item label="支出类型">
           <el-radio-group v-model="formValidate.capitalOrExpense">

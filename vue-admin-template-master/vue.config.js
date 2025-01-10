@@ -45,8 +45,8 @@ module.exports = {
     port: port,
     proxy: {
       '/api': {
-        // target: 'http://106.14.227.239:8090',
-        target: 'http://localhost:8089',
+        target: 'http://106.14.227.239:8090',
+        // target: 'http://localhost:8089',
         changeOrigin: true,
         ws: false,
       }

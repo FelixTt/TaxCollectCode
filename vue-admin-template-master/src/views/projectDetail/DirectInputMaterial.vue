@@ -1,10 +1,10 @@
 <template>
   <div class="content">
     <div class="btn-region" style="display: flex； justify-content:flex-end">
-      <el-button type="primary" size="medium" @click="addSigleTable">
+      <el-button type="primary" size="medium" icon="el-icon-plus" @click="addSigleTable">
         新增
       </el-button>
-      <el-button type="primary" size="medium" @click="dialogVisible = true">
+      <el-button type="primary" size="medium" icon="el-icon-upload" @click="dialogVisible = true">
         批量导入
       </el-button>
     </div>
@@ -18,7 +18,7 @@
         style="width: 100%; margin-top: 20px"
       >
         <el-table-column type="index" width="50"> </el-table-column>
-        <el-table-column prop="year" label="年份">
+        <el-table-column prop="year" label="年份" width="130">
           <template slot-scope="scope">
             <el-select v-model="singleTableParams.year" v-if="scope.row.isEdit == true" placeholder="请选择">
               <el-option
@@ -33,7 +33,7 @@
             </span>
           </template>
         </el-table-column>
-        <el-table-column prop="month" label="月份">
+        <el-table-column prop="month" label="月份" width="100">
           <template slot-scope="scope">
             <el-select v-model="singleTableParams.month" v-if="scope.row.isEdit == true" placeholder="请选择">
               <el-option
@@ -348,6 +348,19 @@ export default {
         this.$message.error("导入失败，请检查导入数据格式是否正确");
         return
       }
+
+      // 对导入的数据进行简单验证
+      // 1、header必须一样
+      // 2、不能为空
+      let checkArr = ['年份', '月份', '日期', '研发项目序号', '种类', '编号', '摘要', '材料名称', '单位', '数量', '单价']
+      for(let i=0; i<header.length; i++) {
+        if(checkArr[i] === header[i]){
+          continue
+        }
+        this.$message.error("导入失败，请检查导入表格数据格式及内容是否正确!");
+        return
+      }
+      
       this.$message.success("导入成功！");
       let newData = this.dealData(results);
       // this.calTotalPrice(newData)
@@ -569,10 +582,11 @@ export default {
       // return this.$Valid.formatDate(time);
     },
     addSigleTable() {
-      if (this.tableData.length === 0 || this.tableData[this.tableData.length -1].isEdit !== true) {
-        this.tableData.push({
+      if (this.tableData.length === 0 || this.tableData[0].isEdit !== true) {
+        // 在表格首部插入
+        this.tableData.splice(0,0,{
           isEdit: true,
-        });
+        })
       } else {
         this.$message({
           message: "请添加信息完成后，再进行添加哦～",

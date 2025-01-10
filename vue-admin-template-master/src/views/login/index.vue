@@ -18,7 +18,7 @@
         <el-input
           ref="username"
           v-model="loginForm.username"
-          placeholder="Username"
+          placeholder="请输入账号"
           name="username"
           type="text"
           tabindex="1"
@@ -35,7 +35,7 @@
           ref="password"
           v-model="loginForm.password"
           :type="passwordType"
-          placeholder="Password"
+          placeholder="请输入密码"
           name="password"
           tabindex="2"
           auto-complete="on"
@@ -105,6 +105,11 @@ export default {
     },
     handleLogin() {
       this.loading = true;
+      if(this.loginForm.username === "" || this.loginForm.password ==="") {
+        this.$message.warning("请输入账号和密码后再登陆😊");
+        this.loading = false
+        return
+      }
       this.$store
         .dispatch("user/login", this.loginForm)
         .then((res) => {
