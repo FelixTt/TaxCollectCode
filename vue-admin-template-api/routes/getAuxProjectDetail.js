@@ -23,4 +23,7 @@ router.get('/getDeductMoney', service.getDeductMoney);
 // 获取7012表文件
 router.get('/get7012File', service.get7012File);
 
+// 通过用户上传的数据，完善7012表并且下载给用户
+router.post('/uploadDataAndDownLoad', service.uploadDataAndDownLoad);
+
 module.exports = router;

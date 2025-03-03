@@ -24,7 +24,7 @@ router.use((err, req, res, next) => {
   console.log('inin 统一异常处理中间件')
   // 自定义用户认证失败的错误返回
   if (err && err.name === 'UnauthorizedError') {
-    console.log('UnauthorizedError')
+    console.log('UnauthorizedError', err)
     const { status = 401, message } = err;
     // 抛出401异常
     res.json({

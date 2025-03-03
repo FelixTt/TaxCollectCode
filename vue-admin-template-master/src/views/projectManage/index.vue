@@ -19,6 +19,7 @@
         border
         highlight-current-row
         v-loading="loading"
+        :default-sort = "{prop: 'date', order: 'descending'}"
       >
         <!-- :data="tableData"
         style="width: 100%"

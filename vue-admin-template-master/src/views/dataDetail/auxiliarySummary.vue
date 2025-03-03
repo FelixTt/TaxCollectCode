@@ -12,10 +12,13 @@
       </el-select>
       <span style="padding-right:10px;"></span>
       <!-- 这个链接显示直接生成7012表，非官方表格样式 -->
-      <el-button type="primary" @click="create7012Table">生成7012表</el-button>
+      <!-- <el-button type="primary" @click="create7012Table">生成7012表</el-button> -->
 
       <!-- 这个链接包含了两个功能，一个是先手动上传，再下载，另一个是直接下载（未完成。） -->
-      <el-button type="primary" @click="goToDownLoadPage">生成7012表</el-button>
+      <!-- <el-button type="primary" @click="goToDownLoadPage">生成7012表</el-button> -->
+
+      <!-- 该链接点击后，将辅助帐汇总表的数据发送至服务端，经过服务端处理后，将表格数据下载给用户 -->
+      <el-button type="primary" @click="uploadDataAndDownLoadClick">下载7012表</el-button>
 
       <!-- 这个页面链接，是为了测试vue.config.js的打包功能。目前暂未成功， -->
       <!-- <el-button type="primary" @click="goToTestPage" style="display:none">测试页面</el-button> -->
@@ -181,6 +184,7 @@ import {
   queryAuxDirectInputOtherRate,
   getDevelopCost,
   getDeductMoney,
+  uploadDataAndDownLoad,
 } from "@/api/getAuxProjectDetail";
 
 export default {
@@ -1326,6 +1330,159 @@ export default {
         return "";
       }
     },
+
+    // 将数据发送至服务端后下载7012表
+    async uploadDataAndDownLoadClick() {
+      
+      //======================= 先计算出7012表所需要的参数 开始========================
+      let list = [
+        {rowIndexInfo: "1", projectInfo: "本年可享受研发费用加计扣除项目数量", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "2", projectInfo: "一、自主研发、合作研发、集中研发（3+7+16+19+23+34）", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "3", projectInfo: "（一）人员人工费用（4+5+6）", amountTotal: ""},
+        {rowIndexInfo: "4", projectInfo: "1.直接从事研发活动人员工资薪金", amountTotal: ""},
+        {rowIndexInfo: "5", projectInfo: "2.直接从事研发活动人员五险一金", amountTotal: ""},
+        {rowIndexInfo: "6", projectInfo: "3.外聘研发人员的劳务费用", amountTotal: ""},
+        {rowIndexInfo: "7", projectInfo: "（二）直接投入费用（8+9+10+11+12+13+14+15）", amountTotal: ""},
+        {rowIndexInfo: "8", projectInfo: "1.研发活动直接消耗材料费用", amountTotal: ""},
+        {rowIndexInfo: "9", projectInfo: "2.研发活动直接消耗燃料费用", amountTotal: ""},
+        {rowIndexInfo: "10", projectInfo: "3.研发活动直接消耗动力费用", amountTotal: ""},
+        {rowIndexInfo: "11", projectInfo: "4.用于中间试验和产品试制的模具、工艺装备开发及制造费", amountTotal: ""},
+        {rowIndexInfo: "12", projectInfo: "5.用于不构成固定资产的样品、样机及一般测试手段购置费", amountTotal: ""},
+        {rowIndexInfo: "13", projectInfo: "6.用于试制产品的检验费", amountTotal: ""},
+        {rowIndexInfo: "14", projectInfo: "7.用于研发活动的仪器、设备的运行维护、调整、检验、维修等费用", amountTotal: ""},
+        {rowIndexInfo: "15", projectInfo: "8.通过经营租赁方式租入的用于研发活动的仪器、设备租赁费", amountTotal: ""},
+        {rowIndexInfo: "16", projectInfo: "（三）折旧费用（17+18）", amountTotal: ""},
+        {rowIndexInfo: "17", projectInfo: "1.用于研发活动的仪器的折旧费", amountTotal: ""},
+        {rowIndexInfo: "18", projectInfo: "2.用于研发活动的设备的折旧费", amountTotal: ""},
+        {rowIndexInfo: "19", projectInfo: "（四）无形资产摊销（20+21+22）", amountTotal: ""},
+        {rowIndexInfo: "20", projectInfo: "1.用于研发活动的软件的摊销费用", amountTotal: ""},
+        {rowIndexInfo: "21", projectInfo: "2.用于研发活动的专利权的摊销费用", amountTotal: ""},
+        {rowIndexInfo: "22", projectInfo: "3.用于研发活动的非专利技术（包括许可证、专有技术、设计和计算方法等）的摊销费用", amountTotal: ""},
+        {rowIndexInfo: "23", projectInfo: "（五）新产品设计费等（24+25+26+27）", amountTotal: ""},
+        {rowIndexInfo: "24", projectInfo: "1.新产品设计费", amountTotal: ""},
+        {rowIndexInfo: "25", projectInfo: "2.新工艺规程制定费", amountTotal: ""},
+        {rowIndexInfo: "26", projectInfo: "3.新药研制的临床试验费", amountTotal: ""},
+        {rowIndexInfo: "27", projectInfo: "4.勘探开发技术的现场试验费", amountTotal: ""},
+        {rowIndexInfo: "28", projectInfo: "（六）其他相关费用(29+30+31+32+33)", amountTotal: ""},
+        {rowIndexInfo: "29", projectInfo: "1.技术图书资料费、资料翻译费、专家咨询费、高新科技研发保险费", amountTotal: ""},
+        {rowIndexInfo: "30", projectInfo: "2.研发成果的检索、分析、评议、论证、鉴定、评审、评估、验收费用", amountTotal: ""},
+        {rowIndexInfo: "31", projectInfo: "3.知识产权的申请费、注册费、代理费", amountTotal: ""},
+        {rowIndexInfo: "32", projectInfo: "4.职工福利费、补充养老保险费、补充医疗保险费", amountTotal: ""},
+        {rowIndexInfo: "33", projectInfo: "5.差旅费、会议费", amountTotal: ""},
+        {rowIndexInfo: "34", projectInfo: "（七）经限额调整后的其他相关费用", amountTotal: ""},
+        {rowIndexInfo: "35", projectInfo: "二、委托研发(36+37+39)", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "36", projectInfo: "    （一）委托境内机构或个人进行研发活动所发生的费用", amountTotal: ""},
+        {rowIndexInfo: "37", projectInfo: "    （二）委托境外机构进行研发活动发生的费用", amountTotal: ""},
+        {rowIndexInfo: "38", projectInfo: "  其中：允许加计扣除的委托境外机构进行研发活动发生的费用", amountTotal: ""},
+        {rowIndexInfo: "39", projectInfo: "    （三）委托境外个人进行研发活动发生的费用", amountTotal: ""},
+        {rowIndexInfo: "40", projectInfo: "三、年度研发费用小计(2+36×80%+38)", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "41", projectInfo: "（一）本年费用化金额", amountTotal: ""},
+        {rowIndexInfo: "42", projectInfo: "（二）本年资本化金额", amountTotal: ""},
+        {rowIndexInfo: "43", projectInfo: "四、本年形成无形资产摊销额", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "44", projectInfo: "五、以前年度形成无形资产本年摊销额", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "45", projectInfo: "六、允许扣除的研发费用合计（41+43+44）", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "46", projectInfo: "减：特殊收入部分", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "47", projectInfo: "七、允许扣除的研发费用抵减特殊收入后的金额(45-46)", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "48", projectInfo: "减：当年销售研发活动直接形成产品（包括组成部分）对应的材料部分", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "49", projectInfo: "减：以前年度销售研发活动直接形成产品（包括组成部分）对应材料部分结转金额", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "50", projectInfo: "八、加计扣除比例及计算方法", amountTotal: "", frontFlag: true},
+        // {rowIndexInfo: "", projectInfo: "本年允许加计扣除的研发费用总额（47-48-49）", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "51", projectInfo: "九、本年研发费用加计扣除总额（47-48-49）×50", amountTotal: "", frontFlag: true},
+        {rowIndexInfo: "52", projectInfo: "十、销售研发活动直接形成产品（包括组成部分）对应材料部分结转以后年度扣减金额（当47-48-49≥0，本行=0；当47-48-49＜0，本行=47-48-49的绝对值)", amountTotal: "", frontFlag: true}
+      ]
+      // 总和
+      let labSalarySum = ""
+      let directInputSum = ""
+      let depreciationSum = ""
+      let intangibleAssetsSum = ""
+      let projectDesignSum = ""
+      let otherRelatedSum = ""
+      let afterLimitOtherRelatedCost = ""
+
+      let entrustDevelopDomesticSum = ""
+      let limitEntrustDevelopDomestic = ""
+      let entrustDevelopAbroadSum = ""
+      let afterLimitEntrustDevelopAbroad = ""
+
+      // 费用化
+      let allowDeductTotal = ""
+
+      try {
+        // 总和
+        labSalarySum = this.summaryMoney.labSalarySum || 0      // 3
+        directInputSum = this.summaryMoney.directInputSum || 0  // 7
+        depreciationSum = this.summaryMoney.depreciationSum || 0    // 16
+        intangibleAssetsSum = this.summaryMoney.intangibleAssetsSum || 0    // 19
+        projectDesignSum = this.summaryMoney.projectDesignSum || 0  // 23
+        otherRelatedSum = this.summaryMoney.otherRelatedSum || 0    // 28
+        afterLimitOtherRelatedCost = this.summaryMoney.afterLimitOtherRelatedCost || 0  // 34
+
+        entrustDevelopDomesticSum = this.summaryMoney.entrustDevelopDomesticSum || 0  // 34
+        limitEntrustDevelopDomestic = this.summaryMoney.limitEntrustDevelopDomestic || 0    // 36
+        entrustDevelopAbroadSum = this.summaryMoney.entrustDevelopAbroadSum || 0    // 36
+        afterLimitEntrustDevelopAbroad = this.summaryMoney.afterLimitEntrustDevelopAbroad || 0 // 37
+
+        // 费用化
+        allowDeductTotal = this.summaryExpenseMoney.allowDeductTotal || 0 // 37
+
+      } catch (error) {
+        this.$message.error("信息丢失，请刷新后重新进入项目再试");
+        return;
+      }
+      list[2].amountTotal = labSalarySum
+      list[6].amountTotal = directInputSum
+      list[15].amountTotal = depreciationSum
+      list[18].amountTotal = intangibleAssetsSum
+      list[22].amountTotal = projectDesignSum
+      list[27].amountTotal = otherRelatedSum
+      list[33].amountTotal = afterLimitOtherRelatedCost
+
+      list[35].amountTotal = entrustDevelopDomesticSum
+      list[36].amountTotal = entrustDevelopAbroadSum
+      list[37].amountTotal = afterLimitEntrustDevelopAbroad
+      list[34].amountTotal = (parseFloat(list[35].amountTotal) || 0) + (parseFloat(list[36].amountTotal) || 0) + (parseFloat(list[38].amountTotal) || 0)
+
+      // 2 = 3+7+16+19+23+34
+      list[1].amountTotal = (parseFloat(list[2].amountTotal) || 0) + (parseFloat(list[6].amountTotal) || 0) + (parseFloat(list[15].amountTotal) || 0) + (parseFloat(list[18].amountTotal) || 0) + (parseFloat(list[22].amountTotal) || 0) + parseFloat(list[33].amountTotal)
+
+
+      list[40].amountTotal = allowDeductTotal
+      list[39].amountTotal = (parseFloat(list[1].amountTotal) || 0) + (parseFloat(list[35].amountTotal) || 0) * 0.8 + (parseFloat(list[37].amountTotal) || 0)
+
+      // this.list[44].amountTotal = (parseFloat(this.list[40].amountTotal) || 0) + (parseFloat(this.list[42].amountTotal) || 0) + (parseFloat(this.list[43].amountTotal) || 0)
+
+    //   减：特殊收入部分
+      list[45].amountTotal = (parseFloat(this.afterCalTotalDevelopCostSum) || 0)
+
+      // this.list[46].amountTotal = this.list[44].amountTotal - this.list[45].amountTotal
+
+    //   减：当年销售研发活动直接形成产品（包括组成部分）对应的材料部分
+      list[47].amountTotal = (parseFloat(this.afterCalTotalDeductMoneySum) || 0)
+
+      
+      //======================= 先计算出7012表所需要的参数 结束========================
+
+
+      let params = {
+        list
+      }
+      let response
+      try {
+        // 可能会抛出错误的代码
+        response = await uploadDataAndDownLoad(params);
+      } catch (error) {
+        console.error('捕获到错误：', error);
+        // 处理错误，比如提示用户或者进行错误记录
+      }
+      // let excelFile = new Blob([response.data],{ type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      // console.log("@@@", excelFile)
+      const url = window.URL.createObjectURL(new Blob([response.data],{ type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'template.xlsx'); // 设置下载文件名
+      document.body.appendChild(link);
+      link.click();
+    }
   },
 };
 </script>

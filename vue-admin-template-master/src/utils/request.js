@@ -49,6 +49,7 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
+    // console.log('Received response:', response);
 
     // 抛出401错误，因为token失效，重新刷新页面，清空缓存，跳转到登录界面
     if (res.code == 401 || res.code === 403) {
@@ -57,9 +58,15 @@ service.interceptors.response.use(
           location.reload();
         });
     }
+    
+    // 新增加的判断，如果是文件下载请求，直接返回响应
+    if (response.config.responseType === 'blob' || response.config.responseType === 'arraybuffer') {
+      return response;
+    }
 
     // if the custom code is not 20000, it is judged as an error.
     if (res.code !== 200) {
+      console.log("@@", res)
       Message({
         message: res.message || 'Error',
         type: 'error',
@@ -97,6 +104,7 @@ service.interceptors.response.use(
       type: 'error',
       duration: 5 * 1000
     })
+    console.log("happen errrrr0rrr", error)
     return Promise.reject(error)
   }
 )

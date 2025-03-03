@@ -126,3 +126,16 @@ export function get7012File() {
   })
 }
 
+// 通过用户上传的数据，完善7012表并且下载给用户
+export function uploadDataAndDownLoad(params) {
+  return request({
+    url: `/uploadDataAndDownLoad`,
+    params,
+    method: "post",
+    responseType: 'blob',
+    onDownloadProgress: progress => {
+        console.log('下载进度:', progress);
+    }
+  })
+}
+
